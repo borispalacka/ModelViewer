@@ -4,6 +4,8 @@
 #include <algorithm>
 #include <qelapsedtimer.h>
 #include <QPoint>
+#include <QString>
+#include <iostream>
 
 class ViewerWidget :public QWidget {
 	Q_OBJECT
@@ -106,3 +108,59 @@ public:
 public slots:
 	void paintEvent(QPaintEvent* event) Q_DECL_OVERRIDE;
 };
+
+
+class H_edge; // Forward deklarácia triedy
+
+class Vertex {
+public:
+	double x = 0, y = 0, z = 0;
+	H_edge* edge = nullptr;
+
+	Vertex(){}
+	Vertex(double x, double y, double z) : x(x), y(y), z(z), edge(nullptr) {}
+
+	bool operator==(const Vertex& ver) const {
+		return x == ver.x && y == ver.y && z == ver.z;
+	}
+};
+
+class Face {
+public:
+	H_edge* edge;
+
+	Face(H_edge* edge) : edge(edge) {}
+};
+
+class H_edge {
+public:
+	Vertex* vert_origin;
+	Face* face;
+	H_edge* edge_prev, * edge_next;
+	H_edge* pair;
+
+	H_edge() {
+		vert_origin = nullptr;
+		face = nullptr;
+		edge_prev = nullptr;
+		edge_next = nullptr;
+		pair = nullptr;
+	}
+	H_edge(Vertex* origin, Face* fc, H_edge* ePrevious, H_edge* eNext, H_edge* pair) : vert_origin(origin), face(fc),
+		edge_prev(ePrevious), edge_next(eNext), pair(pair) {}
+	void setEdge(Vertex* origin, Face* fc, H_edge* ePrevious, H_edge* eNext, H_edge* pair) {
+		vert_origin = origin;
+		face = fc;
+		edge_prev = ePrevious;
+		edge_next = eNext;
+		this->pair = pair;
+	}
+};
+
+void createCubeVTK(double d, QString filename);
+
+void createCubeVTK(QVector<Vertex> vertices, QString filename);
+
+void rotateCubeAnimation(double d);
+
+void createUvSphereVTK(double r, int longitude, int latitude,QString filename);

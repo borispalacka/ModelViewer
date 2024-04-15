@@ -1,5 +1,6 @@
 #include   "ViewerWidget.h"
 #include <QElapsedTimer>
+#include <QFile>
 
 ViewerWidget::ViewerWidget(QSize imgSize, QWidget* parent)
 	: QWidget(parent)
@@ -776,4 +777,184 @@ void ViewerWidget::paintEvent(QPaintEvent* event)
 	QPainter painter(this);
 	QRect area = event->rect();
 	painter.drawImage(area, *img, area);
+}
+
+void createCubeVTK(double d,QString filename) {
+	QVector<Vertex*> vertices = {
+		new Vertex(0, 0, 0), new Vertex(0, d, 0), new Vertex(d, d, 0), new Vertex(d, 0, 0),
+		new Vertex(0,0,d), new Vertex(0,d,d), new Vertex(d,d,d), new Vertex(d,0,d) };
+	QFile file(filename + ".vtk");
+
+	if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+		QTextStream out(&file);
+		out << "#vtk DataFile Version 3.0\n";
+		out << "vtk output\nASCII\nDATASET POLYDATA\n";
+		out << "POINTS " << vertices.size() << "int\n";
+		for (int i = 0; i < vertices.size(); i++) {
+			out << vertices[i]->x << " " << vertices[i]->y << " " << vertices[i]->z << "\n";
+		}
+		out << "POLYGONS 12 48" << "\n";
+		out << "3 0 1 3\n";
+		out << "3 1 2 3\n";
+		out << "3 0 1 5\n";
+		out << "3 0 4 5\n";
+		out << "3 0 3 4\n";
+		out << "3 3 7 4\n";
+		out << "3 3 2 7\n";
+		out << "3 2 6 7\n";
+		out << "3 1 5 6\n";
+		out << "3 2 1 6\n";
+		out << "3 4 7 5\n";
+		out << "3 5 7 6\n";
+		file.close();
+		qDebug() << "file saved sucssefully";
+	}
+	else {
+		qDebug() << "file wasnt open";
+	}
+}
+
+void createCubeVTK(QVector<Vertex> vertices, QString filename) {
+	QFile file(filename + ".vtk");
+
+	if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+		QTextStream out(&file);
+		out << "#vtk DataFile Version 3.0\n";
+		out << "vtk output\nASCII\nDATASET POLYDATA\n";
+		out << "POINTS " << vertices.size() << "int\n";
+		for (int i = 0; i < vertices.size(); i++) {
+			out << vertices[i].x << " " << vertices[i].y << " " << vertices[i].z << "\n";
+		}
+		out << "POLYGONS 12 48" << "\n";
+		out << "3 0 1 3\n";
+		out << "3 1 2 3\n";
+		out << "3 0 1 5\n";
+		out << "3 0 4 5\n";
+		out << "3 0 3 4\n";
+		out << "3 3 7 4\n";
+		out << "3 3 2 7\n";
+		out << "3 2 6 7\n";
+		out << "3 1 5 6\n";
+		out << "3 2 1 6\n";
+		out << "3 4 7 5\n";
+		out << "3 5 7 6\n";
+		file.close();
+		qDebug() << "file saved sucssefully";
+	}
+	else {
+		qDebug() << "file wasnt open";
+	}
+}
+
+void rotateCubeAnimation(double d, int frames) {
+	QVector<Vertex> vertices = {
+		Vertex(0, 0, 0),Vertex(0, d, 0),Vertex(d, d, 0),Vertex(d, 0, 0),
+		Vertex(0,0,d), Vertex(0,d,d),Vertex(d,d,d), Vertex(d,0,d) };
+	double alphaIncrement = 2 * M_PI / frames;
+	double alpha = 0;
+	auto rotatePoints = [](double alpha, QVector<Vertex> vertices)->QVector<Vertex> {
+		for (Vertex& vertex : vertices) {
+			vertex.y *= (cos(alpha) + sin(alpha));
+			vertex.z *= (cos(alpha) - sin(alpha));
+		}
+		return vertices;
+		};
+	for (int frame = 0; frame < frames; frame++) {
+		createCubeVTK(rotatePoints(alpha, vertices), "cubeAnimationFrame" + QString::number(frame));
+	}
+}
+
+void createUvSphereVTK(double r, int longitude, int latitude, QString filename) {
+	QVector<QVector<Vertex>> vertices;
+	double thetaAngle = -M_PI/2;
+	double phiAngle = 0;
+	double rho = r;
+
+	double thetaAngleDivision = M_PI / latitude;
+	double phiAngleDivision = 2 * M_PI / longitude;
+
+	int verticesCount = 0;
+	QFile file("C:\\Users\\keta\\Desktop\\" + filename + ".vtk");
+	if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+		QTextStream out(&file);
+		for (int i = 0; i <= latitude; i++) {
+			QVector<Vertex> verticesOneLatitude;
+			for (int j = 0; j <= longitude; j++) {
+				Vertex vertex;
+				vertex.x = rho * cos(thetaAngle) * cos(phiAngle);
+				vertex.y = rho * cos(thetaAngle) * sin(phiAngle);
+				vertex.z = rho * sin(thetaAngle);
+				verticesOneLatitude.append(vertex);
+				phiAngle += phiAngleDivision;
+				verticesCount++;
+				if (i == 0 || i == latitude) {
+					break;
+				}
+			}
+			vertices.append(verticesOneLatitude);
+			phiAngle = 0;
+			thetaAngle += thetaAngleDivision;
+		}
+		out << "# vtk DataFile Version 3.0\n";
+		out << "vtk output\nASCII\nDATASET POLYDATA\n";
+		out << "POINTS " <<  verticesCount << " FLOAT\n";
+		for (int i = 0; i < vertices.length(); i++) {
+			for (const Vertex& vertex : vertices[i]) {
+				out << vertex.x << " " << vertex.y << " " << vertex.z << "\n";
+				std::cout << vertex.x << " " << vertex.y << " " << vertex.z << "\n";
+			}
+		}
+		//out << "POLYGONS " << 2 * longitude * (latitude + 1) - 20 << " " << 4 * (2 * longitude * (latitude + 1) -20);
+		out << "POLYGONS " << 2 * (longitude * latitude) - 2  << " " << 4 * (2 * (longitude * latitude) - 2) << "\n";
+		int polygonCount = 0;
+		for (int i = 0; i < vertices[1].length(); i++) {
+			if (i < vertices[1].length() - 1) {
+				out << "3 0 " << i + 1 << " " << i + 2 << "\n";
+			}
+			else {
+				out << "3 0 " << i + 1 << " 1\n";
+			}
+			polygonCount++;
+		}
+		int itteratedVertices = 0;
+		int itteratedVerticesNext = 0;
+		for (int i = 1; i < vertices.length() - 2; i++) {
+			itteratedVertices += vertices[i - 1].length();
+			itteratedVerticesNext = itteratedVertices + vertices[i].length();
+			for (int j = 0; j < vertices[i].length(); j++) {
+				if (j < vertices[i].length() - 1) {
+					out << "3 " << itteratedVertices + j << " " << itteratedVerticesNext + j << " " << itteratedVerticesNext + j + 1 << "\n";
+					out << "3 " << itteratedVertices + j << " " << itteratedVerticesNext + j + 1 << " " << itteratedVertices + j + 1 << "\n";
+					polygonCount += 2;
+				}
+				else {
+					out << "3 " << itteratedVertices + j << " " << itteratedVerticesNext + j << " " << itteratedVerticesNext << "\n";
+					out << "3 " << itteratedVertices + j << " " << itteratedVerticesNext << " " << itteratedVertices << "\n";
+					polygonCount += 2;
+				}
+			}
+		}
+		itteratedVertices += vertices[1].length();
+		itteratedVerticesNext = verticesCount - 1;
+		for (int j = 0; j < vertices[1].length(); j++) {
+			if (j < vertices[1].length() - 1) {
+				out << "3 " << itteratedVertices + j << " " << itteratedVerticesNext << " " << itteratedVertices + j + 1 << "\n";
+			}
+			else {
+				out << "3 " << itteratedVertices + j << " " << itteratedVerticesNext << " " << itteratedVertices + j << "\n";
+			}
+			polygonCount++;
+		}
+		qDebug() << "polygon counted " << polygonCount << 2 * longitude * (latitude + 1);
+		qDebug() << "points counted" << verticesCount; 
+		qDebug() << vertices.first().length() << vertices.last().length();
+		file.close();
+		for (int i = 0; i < vertices.length(); i++) {
+			qDebug() << i << vertices[i].length();
+		}
+		qDebug() << "file was saved succsesfully";
+	}
+	else {
+		qDebug() << "file wasnt opened succsesfully";
+	}
 }

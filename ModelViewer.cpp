@@ -19,6 +19,13 @@ ModelViewer::ModelViewer(QWidget* parent)
 	QString style_sheet = QString("background-color: #%1;").arg(globalColor.rgba(), 0, 16);
 	ui->pushButtonSetColor->setStyleSheet(style_sheet);
 
+	//createCubeVTK(2, "cubePolydata");
+	/*createUvSphereVTK(2, 10, 10, "sphereVTK1");
+	createUvSphereVTK(2, 50, 50, "sphereVTK2");*/
+	createUvSphereVTK(2, 2, 2, "sphereVTK3");
+	createUvSphereVTK(2, 3, 3, "sphereVTK4");
+	createUvSphereVTK(2, 11, 11, "sphereVTK5");
+
 }
 
 // Event filters
