@@ -1,7 +1,10 @@
-#include   "ViewerWidget.h"
+#include "ViewerWidget.h"
 #include <QElapsedTimer>
 #include <QFile>
 #include <regex>
+#include <QHash>
+
+#define VTK_FILE_HEADER "#vtk DataFile Version 3.0\nvtk output\nASCII\nDATASET POLYDATA\n"
 
 ViewerWidget::ViewerWidget(QSize imgSize, QWidget* parent)
 	: QWidget(parent)
@@ -57,7 +60,6 @@ bool ViewerWidget::isEmpty()
 	}
 	return false;
 }
-
 bool ViewerWidget::changeSize(int width, int height)
 {
 	QSize newSize(width, height);
@@ -81,7 +83,6 @@ bool ViewerWidget::changeSize(int width, int height)
 
 	return true;
 }
-
 void ViewerWidget::setPixel(int x, int y, uchar r, uchar g, uchar b, uchar a)
 {
 	r = r > 255 ? 255 : (r < 0 ? 0 : r);
@@ -847,37 +848,94 @@ void createCubeVTK(QVector<Vertex> vertices, QString filename) {
 	}
 }
 
-Object_H_edge loadCubeVTK(QString filename) {
+Object_H_edge loadPolygonVTK(QString filename) {
 	Object_H_edge cube;
+	QVector<Vertex> vertices;
+	QHash <QPair<int, int>, H_edge*> edgeMap;
+	QHash <Vertex*, int> vertexIndexMap;
+	QVector<H_edge*> edges;
+
 	QFile file(filename + ".vtk");
-	if (file.open(QIODevice::ReadOnly | QIODevice::Text) ){
+	if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+		QString fileHeader = "";
 		QTextStream input(&file);
-		if (input.readLine() != "#vtk DataFile Version 3.0\n") {
-			qDebug() << "Format of file is  incorrect";
-			return;
+		for (int i = 0; i < 4; i++) {
+			fileHeader += input.readLine() + "\n";
 		}
-		else if (input.readLine() != "vtk output\n") {
-			qDebug() << "Format of file is incorrect";
-			return;
-		}
-		else if (input.readLine() != "ASCII\n") {
-			qDebug() << "Content of file is not ASCII";
-			return;
-		}
-		else if (input.readLine() != "DATASET POLYDATA\n") {
-			qDebug() << "Content of file is not POLYDATA";
-			return;
+		if (fileHeader != VTK_FILE_HEADER) {
+			qDebug() << "File format is incorrect";
+			return Object_H_edge();
 		}
 		QVector<QString> headerData = input.readLine().split(' ');
 		bool isInt;
 		int pointCount = headerData[1].toInt(&isInt);
 		if (headerData[0] != "POINTS" || !isInt || (headerData[2] != "INT\n" && headerData[2] != "FLOAT\n")) {
 			qDebug() << "Content of file is has wrong format";
-			return;
+			return Object_H_edge();
 		}
-		QString line = "";z
-
+		for (int i = 0; i < pointCount; i++) {
+			QVector<QString> points = input.readLine().split(' ');
+			if (points.length() != 3) {
+				qDebug() << "Invalid point count";
+				return Object_H_edge();
+			}
+			Vertex vertex(points[0].toDouble(), points[1].toDouble(), points[2].toDouble());
+			vertices.append(vertex);
+			vertexIndexMap.insert(&vertices.last(), i);
+		}
+		QString objectType = "";
+		int polygonCount = 0;
+		int valueCount = 0;
+		input >> objectType >> polygonCount >> valueCount;
+		for (int i = 0; i < polygonCount; i++) {
+			QVector<QString> data = input.readLine().split(' ');
+			if (data.length() != 4) {
+				return Object_H_edge();
+			}
+			QVector<int> vertexIndex;
+			for (int j = 1; j < data.length(); j++) {
+				vertexIndex.append(data[j].toInt());
+			}
+			int edgesInPolygonCount = data[0].toInt();
+			QVector<H_edge*> edgesInPolygon(edgesInPolygonCount);
+			for (int j = 0; j < edgesInPolygonCount; j++) {
+				edgesInPolygon[j] = new H_edge(&vertices[vertexIndex[j]], nullptr, nullptr, nullptr, nullptr);
+			}
+			Face* currentFace = new Face(edgesInPolygon[0]);
+			for (int j = 0; j < edgesInPolygonCount; j++) {
+				if (j != edgesInPolygonCount - 1) {
+					edgesInPolygon[j]->edge_next = edgesInPolygon[j + 1];
+				}
+				else {
+					edgesInPolygon[j]->edge_next = edgesInPolygon.first();
+				}
+				if (j != 0) {
+					edgesInPolygon[j]->edge_prev = edgesInPolygon[j - 1];
+				}
+				else {
+					edgesInPolygon[j]->edge_prev = edgesInPolygon.last();
+				}
+				edgesInPolygon[j]->face = currentFace;
+				int indexOfEdgeStart = vertexIndexMap.value(edgesInPolygon[j]->vert_origin);
+				int indexOfEdgeEnd = vertexIndexMap.value(edgesInPolygon[j]->edge_next->vert_origin);
+				if (edgeMap.contains({ indexOfEdgeEnd, indexOfEdgeStart })) {
+					edgesInPolygon[j]->pair = edgeMap[{indexOfEdgeEnd, indexOfEdgeStart}];
+					edgesInPolygon[j]->pair->pair = edgesInPolygon[j];
+					edgeMap.remove({indexOfEdgeEnd, indexOfEdgeStart});
+				}
+				else {
+					edgeMap.insert({ indexOfEdgeStart, indexOfEdgeEnd }, edgesInPolygon[j]);
+				}
+			}
+			edges.append(edgesInPolygon);
+		}
 	}
+	return cube;
+}
+
+void savePolygonVTK(QString filenanem) {
+
+}
 
 void rotateCubeAnimation(double d, int frames) {
 	QVector<Vertex> vertices = {

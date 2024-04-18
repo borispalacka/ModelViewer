@@ -159,14 +159,19 @@ public:
 
 class Object_H_edge {
 public:
-	QVector<Vertex> vertices;
-	QVector<H_edge> edges;
+	QVector<Vertex*> vertices;
+	QVector<H_edge*> edges;
+
+	Object_H_edge() {};
+	Object_H_edge(QVector<Vertex*> vert, QVector<H_edge*> edg) : vertices(vert), edges(edg) {};
 
 };
 
 void createCubeVTK(double d, QString filename);
 
-Object_H_edge loadCubeVTK(QString filename);
+Object_H_edge loadPolygonVTK(QString filename);
+
+void savePolygonVTK(QString filename);
 
 void createCubeVTK(QVector<Vertex> vertices, QString filename);
 
