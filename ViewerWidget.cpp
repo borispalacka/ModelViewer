@@ -848,9 +848,9 @@ void createCubeVTK(QVector<Vertex> vertices, QString filename) {
 	}
 }
 
-Object_H_edge loadPolygonVTK(QString filename) {
-	Object_H_edge cube;
-	QVector<Vertex> vertices;
+Object_H_edge loadPolygonsVTK(QString filename) {
+	QVector<Vertex*> vertices;
+	QVector<Face*> faces;
 	QHash <QPair<int, int>, H_edge*> edgeMap;
 	QHash <Vertex*, int> vertexIndexMap;
 	QVector<H_edge*> edges;
@@ -869,7 +869,7 @@ Object_H_edge loadPolygonVTK(QString filename) {
 		QVector<QString> headerData = input.readLine().split(' ');
 		bool isInt;
 		int pointCount = headerData[1].toInt(&isInt);
-		if (headerData[0] != "POINTS" || !isInt || (headerData[2] != "INT\n" && headerData[2] != "FLOAT\n")) {
+		if (headerData[0] != "POINTS" || !isInt || (headerData[2] != "int\n" && headerData[2] != "float\n")) {
 			qDebug() << "Content of file is has wrong format";
 			return Object_H_edge();
 		}
@@ -879,9 +879,9 @@ Object_H_edge loadPolygonVTK(QString filename) {
 				qDebug() << "Invalid point count";
 				return Object_H_edge();
 			}
-			Vertex vertex(points[0].toDouble(), points[1].toDouble(), points[2].toDouble());
+			Vertex *vertex = new Vertex(points[0].toDouble(), points[1].toDouble(), points[2].toDouble());
 			vertices.append(vertex);
-			vertexIndexMap.insert(&vertices.last(), i);
+			vertexIndexMap.insert(vertices.last(), i);
 		}
 		QString objectType = "";
 		int polygonCount = 0;
@@ -899,9 +899,10 @@ Object_H_edge loadPolygonVTK(QString filename) {
 			int edgesInPolygonCount = data[0].toInt();
 			QVector<H_edge*> edgesInPolygon(edgesInPolygonCount);
 			for (int j = 0; j < edgesInPolygonCount; j++) {
-				edgesInPolygon[j] = new H_edge(&vertices[vertexIndex[j]], nullptr, nullptr, nullptr, nullptr);
+				edgesInPolygon[j] = new H_edge(vertices[vertexIndex[j]], nullptr, nullptr, nullptr, nullptr);
 			}
 			Face* currentFace = new Face(edgesInPolygon[0]);
+			faces.append(currentFace);
 			for (int j = 0; j < edgesInPolygonCount; j++) {
 				if (j != edgesInPolygonCount - 1) {
 					edgesInPolygon[j]->edge_next = edgesInPolygon[j + 1];
@@ -930,11 +931,38 @@ Object_H_edge loadPolygonVTK(QString filename) {
 			edges.append(edgesInPolygon);
 		}
 	}
-	return cube;
+	return Object_H_edge(vertices,edges,faces);
 }
 
-void savePolygonVTK(QString filenanem) {
-
+void savePolygonsVTK(QString filename, Object_H_edge object) {
+	QFile file(filename + ".vtk");
+	if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+		QHash <Vertex*, int> vertexIndexMap;
+		QTextStream output(&file);
+		output << VTK_FILE_HEADER;
+		output << "POINTS " << object.vertices.length() << " float\n";
+		for (int i = 0; i < object.vertices.length(); i++) {
+			output << object.vertices[i]->x << " " << object.vertices[i]->y << " " << object.vertices[i]->z << "\n";
+			vertexIndexMap.insert(object.vertices[i], i);
+		}
+		for (const Face *face : object.faces) {
+			int dataLenght = 0;
+			QString polygonData = "";
+			H_edge *firstEdge = face->edge;
+			polygonData.append(" " + QString::number(vertexIndexMap.value(firstEdge->vert_origin)));
+			H_edge *currentEdge = firstEdge->edge_next;
+			polygonData.append(" " + QString::number(vertexIndexMap.value(currentEdge->vert_origin)));
+			H_edge *nextEdge = currentEdge;
+			dataLenght = 2;
+			while(*nextEdge != *firstEdge) {
+				nextEdge = currentEdge->edge_next;
+				polygonData.append(" " + QString::number(vertexIndexMap.value(nextEdge->vert_origin)));
+				dataLenght++;
+				currentEdge = nextEdge;
+			}
+			polygonData.push_front(QString::number(dataLenght));
+		}
+	}
 }
 
 void rotateCubeAnimation(double d, int frames) {

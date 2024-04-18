@@ -155,23 +155,31 @@ public:
 		edge_next = eNext;
 		this->pair = pair;
 	}
+
+	bool operator==(const H_edge& e) const {
+		return e.edge_next == edge_next && e.edge_prev == edge_prev && e.face == face && e.vert_origin == vert_origin && e.pair == pair;
+	}
+	bool operator!=(const H_edge& e) const {
+		return e.edge_next != edge_next || e.edge_prev != edge_prev || e.face != face || e.vert_origin != vert_origin || e.pair != pair;
+	}
 };
 
 class Object_H_edge {
 public:
 	QVector<Vertex*> vertices;
 	QVector<H_edge*> edges;
+	QVector<Face*> faces;
 
 	Object_H_edge() {};
-	Object_H_edge(QVector<Vertex*> vert, QVector<H_edge*> edg) : vertices(vert), edges(edg) {};
+	Object_H_edge(QVector<Vertex*> vert, QVector<H_edge*> edg,QVector<Face*> fcs) : vertices(vert), edges(edg),faces(fcs) {};
 
 };
 
 void createCubeVTK(double d, QString filename);
 
-Object_H_edge loadPolygonVTK(QString filename);
+Object_H_edge loadPolygonsVTK(QString filename);
 
-void savePolygonVTK(QString filename);
+void savePolygonsVTK(QString filename,Object_H_edge object);
 
 void createCubeVTK(QVector<Vertex> vertices, QString filename);
 
