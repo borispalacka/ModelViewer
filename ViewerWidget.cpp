@@ -1,6 +1,7 @@
 #include   "ViewerWidget.h"
 #include <QElapsedTimer>
 #include <QFile>
+#include <regex>
 
 ViewerWidget::ViewerWidget(QSize imgSize, QWidget* parent)
 	: QWidget(parent)
@@ -789,7 +790,7 @@ void createCubeVTK(double d,QString filename) {
 		QTextStream out(&file);
 		out << "#vtk DataFile Version 3.0\n";
 		out << "vtk output\nASCII\nDATASET POLYDATA\n";
-		out << "POINTS " << vertices.size() << "int\n";
+		out << "POINTS " << vertices.size() << " float\n";
 		for (int i = 0; i < vertices.size(); i++) {
 			out << vertices[i]->x << " " << vertices[i]->y << " " << vertices[i]->z << "\n";
 		}
@@ -845,6 +846,38 @@ void createCubeVTK(QVector<Vertex> vertices, QString filename) {
 		qDebug() << "file wasnt open";
 	}
 }
+
+Object_H_edge loadCubeVTK(QString filename) {
+	Object_H_edge cube;
+	QFile file(filename + ".vtk");
+	if (file.open(QIODevice::ReadOnly | QIODevice::Text) ){
+		QTextStream input(&file);
+		if (input.readLine() != "#vtk DataFile Version 3.0\n") {
+			qDebug() << "Format of file is  incorrect";
+			return;
+		}
+		else if (input.readLine() != "vtk output\n") {
+			qDebug() << "Format of file is incorrect";
+			return;
+		}
+		else if (input.readLine() != "ASCII\n") {
+			qDebug() << "Content of file is not ASCII";
+			return;
+		}
+		else if (input.readLine() != "DATASET POLYDATA\n") {
+			qDebug() << "Content of file is not POLYDATA";
+			return;
+		}
+		QVector<QString> headerData = input.readLine().split(' ');
+		bool isInt;
+		int pointCount = headerData[1].toInt(&isInt);
+		if (headerData[0] != "POINTS" || !isInt || (headerData[2] != "INT\n" && headerData[2] != "FLOAT\n")) {
+			qDebug() << "Content of file is has wrong format";
+			return;
+		}
+		QString line = "";z
+
+	}
 
 void rotateCubeAnimation(double d, int frames) {
 	QVector<Vertex> vertices = {

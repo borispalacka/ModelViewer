@@ -157,10 +157,19 @@ public:
 	}
 };
 
+class Object_H_edge {
+public:
+	QVector<Vertex> vertices;
+	QVector<H_edge> edges;
+
+};
+
 void createCubeVTK(double d, QString filename);
+
+Object_H_edge loadCubeVTK(QString filename);
 
 void createCubeVTK(QVector<Vertex> vertices, QString filename);
 
-void rotateCubeAnimation(double d);
+void rotateCubeAnimation(double d, int frames);
 
 void createUvSphereVTK(double r, int longitude, int latitude,QString filename);
