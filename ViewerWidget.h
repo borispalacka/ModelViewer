@@ -170,7 +170,7 @@ public:
 	QVector<H_edge*> edges;
 	QVector<Face*> faces;
 
-	Object_H_edge() {};
+	Object_H_edge(){};
 	Object_H_edge(QVector<Vertex*> vert, QVector<H_edge*> edg,QVector<Face*> fcs) : vertices(vert), edges(edg),faces(fcs) {};
 
 };

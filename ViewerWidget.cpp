@@ -795,7 +795,7 @@ void createCubeVTK(double d,QString filename) {
 		for (int i = 0; i < vertices.size(); i++) {
 			out << vertices[i]->x << " " << vertices[i]->y << " " << vertices[i]->z << "\n";
 		}
-		out << "POLYGONS 12 48" << "\n";
+		out << "POLYGONS 12 48\n";
 		out << "3 0 1 3\n";
 		out << "3 1 2 3\n";
 		out << "3 0 1 5\n";
@@ -862,6 +862,7 @@ Object_H_edge loadPolygonsVTK(QString filename) {
 		for (int i = 0; i < 4; i++) {
 			fileHeader += input.readLine() + "\n";
 		}
+		qDebug() << fileHeader;
 		if (fileHeader != VTK_FILE_HEADER) {
 			qDebug() << "File format is incorrect";
 			return Object_H_edge();
@@ -869,8 +870,9 @@ Object_H_edge loadPolygonsVTK(QString filename) {
 		QVector<QString> headerData = input.readLine().split(' ');
 		bool isInt;
 		int pointCount = headerData[1].toInt(&isInt);
-		if (headerData[0] != "POINTS" || !isInt || (headerData[2] != "int\n" && headerData[2] != "float\n")) {
-			qDebug() << "Content of file is has wrong format";
+		qDebug() << headerData;
+		if (headerData[0] != "POINTS" || !isInt || (headerData[2] != "int" && headerData[2] != "float")) {
+			qDebug() << "Content of file has wrong format";
 			return Object_H_edge();
 		}
 		for (int i = 0; i < pointCount; i++) {
@@ -887,9 +889,11 @@ Object_H_edge loadPolygonsVTK(QString filename) {
 		int polygonCount = 0;
 		int valueCount = 0;
 		input >> objectType >> polygonCount >> valueCount;
+		input.readLine();
 		for (int i = 0; i < polygonCount; i++) {
-			QVector<QString> data = input.readLine().split(' ');
-			if (data.length() != 4) {
+			QString str = input.readLine();
+			QVector<QString> data = str.split(' ');
+			if (data.length() < 4) {
 				return Object_H_edge();
 			}
 			QVector<int> vertexIndex;
@@ -930,8 +934,14 @@ Object_H_edge loadPolygonsVTK(QString filename) {
 			}
 			edges.append(edgesInPolygon);
 		}
+		qDebug() << filename << " : file has been loaded";
+		file.close();
+		return Object_H_edge(vertices, edges, faces);
 	}
-	return Object_H_edge(vertices,edges,faces);
+	else {
+		qDebug() << filename << " : file failed to open";
+		return Object_H_edge();
+	}
 }
 
 void savePolygonsVTK(QString filename, Object_H_edge object) {
@@ -940,28 +950,44 @@ void savePolygonsVTK(QString filename, Object_H_edge object) {
 		QHash <Vertex*, int> vertexIndexMap;
 		QTextStream output(&file);
 		output << VTK_FILE_HEADER;
+		std::cout << VTK_FILE_HEADER;
 		output << "POINTS " << object.vertices.length() << " float\n";
+		std::cout << "POINTS " << object.vertices.length() << " float\n";
 		for (int i = 0; i < object.vertices.length(); i++) {
 			output << object.vertices[i]->x << " " << object.vertices[i]->y << " " << object.vertices[i]->z << "\n";
+			qDebug() << object.vertices[i]->x << object.vertices[i]->y << object.vertices[i]->z;
 			vertexIndexMap.insert(object.vertices[i], i);
 		}
+		QString polygonData = "";
+		int polygonDataLength = 0;
 		for (const Face *face : object.faces) {
 			int dataLenght = 0;
-			QString polygonData = "";
+			QString polygonDataLine = "";
 			H_edge *firstEdge = face->edge;
-			polygonData.append(" " + QString::number(vertexIndexMap.value(firstEdge->vert_origin)));
+			polygonDataLine.append(" " + QString::number(vertexIndexMap.value(firstEdge->vert_origin)));
 			H_edge *currentEdge = firstEdge->edge_next;
-			polygonData.append(" " + QString::number(vertexIndexMap.value(currentEdge->vert_origin)));
+			polygonDataLine.append(" " + QString::number(vertexIndexMap.value(currentEdge->vert_origin)));
 			H_edge *nextEdge = currentEdge;
 			dataLenght = 2;
-			while(*nextEdge != *firstEdge) {
+			while(*nextEdge != *firstEdge->edge_prev) {
 				nextEdge = currentEdge->edge_next;
-				polygonData.append(" " + QString::number(vertexIndexMap.value(nextEdge->vert_origin)));
+				polygonDataLine.append(" " + QString::number(vertexIndexMap.value(nextEdge->vert_origin)));
 				dataLenght++;
 				currentEdge = nextEdge;
 			}
-			polygonData.push_front(QString::number(dataLenght));
+			polygonDataLine.push_front(QString::number(dataLenght));
+			polygonDataLength += 1 + dataLenght;
+			polygonData += polygonDataLine + "\n";
 		}
+		polygonData.push_front("POLYGONS " + QString::number(object.faces.length()) + " " + QString::number(polygonDataLength) + "\n");
+		output << polygonData;
+		std::cout << polygonData.toStdString() << std::endl;
+
+		file.close();
+		qDebug() << filename << " : writing to file succsesfull";
+	}
+	else {
+		qDebug() << filename << " : file failed to open";
 	}
 }
 
