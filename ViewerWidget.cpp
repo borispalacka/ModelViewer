@@ -1019,7 +1019,7 @@ void createUvSphereVTK(double r, int longitude, int latitude, QString filename) 
 	double phiAngleDivision = 2 * M_PI / longitude;
 
 	int verticesCount = 0;
-	QFile file("C:\\Users\\keta\\Desktop\\" + filename + ".vtk");
+	QFile file(filename + ".vtk");
 	if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
 		QTextStream out(&file);
 		for (int i = 0; i <= latitude; i++) {
@@ -1040,16 +1040,14 @@ void createUvSphereVTK(double r, int longitude, int latitude, QString filename) 
 			phiAngle = 0;
 			thetaAngle += thetaAngleDivision;
 		}
-		out << "# vtk DataFile Version 3.0\n";
-		out << "vtk output\nASCII\nDATASET POLYDATA\n";
-		out << "POINTS " <<  verticesCount << " FLOAT\n";
+		out << VTK_FILE_HEADER;
+		out << "POINTS " <<  verticesCount << " float\n";
 		for (int i = 0; i < vertices.length(); i++) {
 			for (const Vertex& vertex : vertices[i]) {
 				out << vertex.x << " " << vertex.y << " " << vertex.z << "\n";
 				std::cout << vertex.x << " " << vertex.y << " " << vertex.z << "\n";
 			}
 		}
-		//out << "POLYGONS " << 2 * longitude * (latitude + 1) - 20 << " " << 4 * (2 * longitude * (latitude + 1) -20);
 		out << "POLYGONS " << 2 * (longitude * latitude) - 2  << " " << 4 * (2 * (longitude * latitude) - 2) << "\n";
 		int polygonCount = 0;
 		for (int i = 0; i < vertices[1].length(); i++) {
@@ -1090,12 +1088,8 @@ void createUvSphereVTK(double r, int longitude, int latitude, QString filename) 
 			}
 			polygonCount++;
 		}
-		qDebug() << "polygon counted " << polygonCount << 2 * longitude * (latitude + 1);
-		qDebug() << "points counted" << verticesCount; 
-		qDebug() << vertices.first().length() << vertices.last().length();
 		file.close();
 		for (int i = 0; i < vertices.length(); i++) {
-			qDebug() << i << vertices[i].length();
 		}
 		qDebug() << "file was saved succsesfully";
 	}
