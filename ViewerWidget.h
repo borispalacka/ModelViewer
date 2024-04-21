@@ -6,6 +6,7 @@
 #include <QPoint>
 #include <QString>
 #include <iostream>
+#include <math.h>
 
 //-------------Need to place this in different header---------
 
@@ -21,6 +22,9 @@ public:
 
 	bool operator==(const Vertex& ver) const {
 		return x == ver.x && y == ver.y && z == ver.z;
+	}
+	double operator*(const Vertex& ver)const {
+		return ver.x * x + ver.y * y + ver.z * z;
 	}
 };
 
@@ -108,8 +112,21 @@ public:
 	Vertex basisVectorU = Vertex(0, 0, 0);
 	Vertex basisVectorV = Vertex(0, 0, 0);
 	ProjectionPlane() {};
-	ProjectionPlane(double az, double zen, Vertex vN, Vertex vU, Vertex vV, Vertex vectorNormal) :
-		azimut(az), zenit(az), basisVectorN(vN), basisVectorU(vU), basisVectorV(vV), normalVector(vectorNormal) {};
+	ProjectionPlane(double az, double zen, Vertex vectorNormal) :
+		azimut(az), zenit(zen), normalVector(vectorNormal) {
+		basisVectorN = Vertex(sin(zen) * sin(az), sin(zen) * cos(az), cos(zen));
+		basisVectorU = Vertex(sin(zen + M_PI / 2) * sin(az), sin(zen + M_PI / 2) * cos(az), cos(zen + M_PI / 2));
+		basisVectorV.x = basisVectorN.y * basisVectorU.z - basisVectorN.z * basisVectorU.y;
+		basisVectorV.y = basisVectorN.z * basisVectorU.x - basisVectorN.x * basisVectorU.z;
+		basisVectorV.z = basisVectorN.x * basisVectorU.y - basisVectorN.y * basisVectorU.x;
+	};
+	void setVectorBasis(double az, double zen) {
+		basisVectorN = Vertex(sin(zen) * sin(az), sin(zen) * cos(az), cos(zen));
+		basisVectorU = Vertex(sin(zen + M_PI / 2) * sin(az), sin(zen + M_PI / 2) * cos(az), cos(zen + M_PI / 2));
+		basisVectorV.x = basisVectorN.y * basisVectorU.z - basisVectorN.z * basisVectorU.y;
+		basisVectorV.y = basisVectorN.z * basisVectorU.x - basisVectorN.x * basisVectorU.z;
+		basisVectorV.z = basisVectorN.x * basisVectorU.y - basisVectorN.y * basisVectorU.x;
+	}
 };
 //-------------------------------------------------------------
 
@@ -120,6 +137,9 @@ private:
 	QImage* img = nullptr;
 	QPainter* painter = nullptr;
 	uchar* data = nullptr;
+
+	Camera camera;
+	ProjectionPlane projectionPlane;
 
 	bool drawLineActivated = false;
 	QPoint drawLineBegin = QPoint(0, 0);
@@ -135,6 +155,10 @@ private:
 
 	bool croppedBySutherlandHodgman = false;
 
+	bool drawObjectActivated = false;
+	Object_H_edge drawObject = Object_H_edge();
+
+
 	//Image Editing variables
 	bool dragReady = false;
 	QPoint dragStartingPosition = QPoint();
@@ -144,6 +168,39 @@ public:
 	ViewerWidget(QSize imgSize, QWidget* parent = Q_NULLPTR);
 	~ViewerWidget();
 	void resizeWidget(QSize size);
+
+	//Get/Set functions
+	uchar* getData() { return data; }
+	void setDataPtr() { data = img->bits(); }
+	void setPainter() { painter = new QPainter(img); }
+	int getImgWidth() { return img->width(); };
+	int getImgHeight() { return img->height(); };
+	//CAMERA & PROJECTION PLANE
+	ProjectionPlane& getProjectionPlane() { return projectionPlane; }
+	Camera& getCamera() { return camera; }
+	//LINE DRAW
+	void setDrawLineBegin(QPoint begin) { drawLineBegin = begin; }
+	QPoint getDrawLineBegin() { return drawLineBegin; }
+	void setDrawLineEnd(QPoint end) { drawLineEnd = end; }
+	QPoint getDrawLineEnd() { return drawLineEnd; }
+	void setDrawLineActivated(bool state) { drawLineActivated = state; }
+	bool getDrawLineActivated() { return drawLineActivated; }
+	//POLYGON DRAW
+	void setDrawPolygonActivated(bool state) { drawPolygonActivated = state; }
+	bool getDrawPolygonActivated() { return drawPolygonActivated; }
+	QVector<QPoint>& getDrawPolygonPoints() { return drawPolygonPoints; }
+	void setDrawPolygonPoints(QVector<QPoint> points) { drawPolygonPoints = points; }
+	//CURVE DRAW
+	void setDrawCurveActivated(bool state) { drawCurveActivated = state; }
+	bool getDrawCurveActivated() { return drawCurveActivated; }
+	void setDrawCurveMasterPoints(QVector<QPair<QPoint, QPoint>> points) { drawCurveMasterPoints = points; }
+	QVector<QPair<QPoint, QPoint>>& getDrawCurveMasterPoints() { return drawCurveMasterPoints; }
+	//3D OBJECT DRAW
+	void setDrawObjectActivated(bool state) { drawObjectActivated = state; }
+	bool getDrawObjectActivated() { return drawObjectActivated; }
+	void setDrawObject(Object_H_edge object) { drawObject = object; }
+	Object_H_edge getDrawObject() { return drawObject; }
+
 
 	//Image functions
 	bool setImage(const QImage& inputImg);
@@ -172,8 +229,10 @@ public:
 	void drawCurveHermint(QVector<QPair<QPoint, QPoint>> points, QColor color);
 	void drawCurveCasteljau(QVector<QPoint> points, QColor color);
 	void drawCurveCoons(QVector<QPoint> points, QColor color);
+
 	//3D draw functions
 	void drawObject(Object_H_edge object, Camera camera, ProjectionPlane projectionPlane);
+	Object_H_edge perspectiveCoordSystemTransformation(Object_H_edge object);
 
 	QVector <QPoint> cyrusBeck(QPoint P1, QPoint P2);
 	QVector <QPoint> sutherlandHodgman(QVector<QPoint> V);
@@ -185,32 +244,6 @@ public:
 	QPoint getDragStartingPosition() { return dragStartingPosition; }
 	void setDragedPoint(QPoint point) { dragedPoint = point; }
 	QPoint getDragedPoint() { return dragedPoint; }
-
-	//Get/Set functions
-	uchar* getData() { return data; }
-	void setDataPtr() { data = img->bits(); }
-	void setPainter() { painter = new QPainter(img); }
-
-	int getImgWidth() { return img->width(); };
-	int getImgHeight() { return img->height(); };
-
-	void setDrawLineBegin(QPoint begin) { drawLineBegin = begin; }
-	QPoint getDrawLineBegin() { return drawLineBegin; }
-	void setDrawLineEnd(QPoint end) { drawLineEnd = end; }
-	QPoint getDrawLineEnd() { return drawLineEnd; }
-	void setDrawLineActivated(bool state) { drawLineActivated = state; }
-	bool getDrawLineActivated() { return drawLineActivated; }
-
-	void setDrawPolygonActivated(bool state) { drawPolygonActivated = state; }
-	bool getDrawPolygonActivated() { return drawPolygonActivated; }
-	QVector<QPoint>& getDrawPolygonPoints() { return drawPolygonPoints; }
-	void setDrawPolygonPoints(QVector<QPoint> points) { drawPolygonPoints = points; }
-
-	void setDrawCurveActivated(bool state) { drawCurveActivated = state; }
-	bool getDrawCurveActivated() { return drawCurveActivated; }
-	void setDrawCurveMasterPoints(QVector<QPair<QPoint, QPoint>> points) { drawCurveMasterPoints = points; }
-	QVector<QPair<QPoint, QPoint>>& getDrawCurveMasterPoints() { return drawCurveMasterPoints; }
-	
 
 	void clear();
 

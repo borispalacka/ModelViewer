@@ -18,10 +18,7 @@ private:
 
 	QColor globalColor;
 	QSettings settings;
-	QMessageBox msgBox;
-	Camera camera;
-	ProjectionPlane projectionPlane;
-	
+	QMessageBox msgBox;	
 
 	//Event filters
 	bool eventFilter(QObject* obj, QEvent* event);
@@ -76,7 +73,10 @@ private slots:
 	void on_spinBoxShearFactor_editingFinished();
 
 	void on_toolButtonSymmetry_clicked();
+
 	//3D mode 
 	void on_comboBoxTypeCreateVTK_currentIndexChanged(int index);
 	void on_pushButtonCreateVTK_clicked();
+	void on_doubleSpinBoxZenit_valueChanged(double value);
+	void on_doubleSpinBoxAzimut_valueChanged(double value);
 };

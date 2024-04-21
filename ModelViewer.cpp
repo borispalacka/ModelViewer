@@ -5,7 +5,7 @@ ModelViewer::ModelViewer(QWidget* parent)
 	: QMainWindow(parent), ui(new Ui::ModelViewerClass)
 {
 	ui->setupUi(this);
-	vW = new ViewerWidget(QSize(500, 500));
+	vW = new ViewerWidget(QSize(1000, 750));
 	ui->scrollArea->setWidget(vW);
 	ui->scrollArea->setBackgroundRole(QPalette::Dark);
 	ui->scrollArea->setWidgetResizable(true);
@@ -18,8 +18,10 @@ ModelViewer::ModelViewer(QWidget* parent)
 	globalColor = Qt::blue;
 	QString style_sheet = QString("background-color: #%1;").arg(globalColor.rgba(), 0, 16);
 	ui->pushButtonSetColor->setStyleSheet(style_sheet);
-
-	Camera camera(Vertex(1, 1, 1));
+	ui->doubleSpinBoxZenit->setMinimum(-M_PI);
+	ui->doubleSpinBoxZenit->setMaximum(M_PI);
+	ui->doubleSpinBoxAzimut->setMinimum(0);
+	ui->doubleSpinBoxAzimut->setMaximum(2 * M_PI);
 }
 
 // Event filters
@@ -302,6 +304,7 @@ bool ModelViewer::saveImage(QString filename)
 }
 
 //Slots
+//2D Slots
 void ModelViewer::on_toolButtonDrawLine_clicked() {
 	ui->toolButtonDrawCircle->setChecked(false);
 	ui->toolButtonDrawPolygon->setChecked(false);
@@ -661,6 +664,8 @@ void ModelViewer::on_pushButtonSetColor_clicked()
 	}
 }
 
+
+//3D slots
 void ModelViewer::on_comboBoxTypeCreateVTK_currentIndexChanged(int index) {
 	if (index == 0) {
 		ui->spinBoxLongLatCount->setEnabled(false);
@@ -675,4 +680,18 @@ void ModelViewer::on_comboBoxTypeCreateVTK_currentIndexChanged(int index) {
 }
 void ModelViewer::on_pushButtonCreateVTK_clicked() {
 
+}
+void ModelViewer::on_doubleSpinBoxZenit_valueChanged(double value) {
+	vW->getProjectionPlane().zenit = value;
+	vW->getProjectionPlane().setVectorBasis(vW->getProjectionPlane().azimut, value);
+	if (vW->getDrawObjectActivated()) {
+		vW->drawObject(vW->getDrawObject(), vW->getCamera(), vW->getProjectionPlane());
+	}
+}
+void ModelViewer::on_doubleSpinBoxAzimut_valueChanged(double value) {
+	vW->getProjectionPlane().azimut = value;
+	vW->getProjectionPlane().setVectorBasis(value, vW->getProjectionPlane().zenit);
+	if (vW->getDrawObjectActivated()) {
+		vW->drawObject(vW->getDrawObject(), vW->getCamera(), vW->getProjectionPlane());
+	}
 }

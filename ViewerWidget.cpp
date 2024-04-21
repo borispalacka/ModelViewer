@@ -672,9 +672,31 @@ void ViewerWidget::drawCurveCoons(QVector<QPoint> points, QColor color) {
 }
 //3D draw functions
 void ViewerWidget::drawObject(Object_H_edge object, Camera camera, ProjectionPlane projectionPlane) {
-
+	object = perspectiveCoordSystemTransformation(object);
+	for (Face* face : object.faces) {
+		H_edge *edgeStart = face->edge;
+		H_edge* edgeNext = edgeStart->edge_next;
+		QPoint lineStart = QPoint(static_cast<int>(edgeStart->vert_origin->x),static_cast<int>( edgeStart->vert_origin->y));
+		QPoint lineEnd = QPoint(static_cast<int>(edgeNext->vert_origin->x), static_cast<int>(edgeNext->vert_origin->y));
+		drawLine(lineStart, lineEnd, Qt::black, 1);
+		while (edgeNext != face->edge) {
+			lineStart = QPoint(static_cast<int>(edgeNext->vert_origin->x), static_cast<int>(edgeNext->vert_origin->y));
+			edgeNext = edgeNext->edge_next;
+			lineEnd = QPoint(static_cast<int>(edgeNext->vert_origin->x), static_cast<int>(edgeNext->vert_origin->y));
+			drawLine(lineStart, lineEnd, Qt::black, 1);
+		}
+	}
+	update();
 }
-
+Object_H_edge ViewerWidget::perspectiveCoordSystemTransformation(Object_H_edge object) {
+	Object_H_edge transformedObject = object;
+	for (Vertex* vertex : transformedObject.vertices) {
+		vertex->x = *vertex * projectionPlane.basisVectorV;	//overload vector dot product 
+		vertex->y = *vertex * projectionPlane.basisVectorU;
+		vertex->z = *vertex * projectionPlane.basisVectorN;
+	}
+	return transformedObject;
+}
 //Crop functions
 QVector<QPoint> ViewerWidget::cyrusBeck(QPoint P1, QPoint P2) {
 	if (P1.x() < 0 && P2.x() < 0 || P1.x() > img->width() && P2.x() > img->width() ||
