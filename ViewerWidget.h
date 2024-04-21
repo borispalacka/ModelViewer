@@ -6,7 +6,7 @@
 #include <QPoint>
 #include <QString>
 #include <iostream>
-#include <math.h>
+#include <cmath>
 
 //-------------Need to place this in different header---------
 
@@ -25,6 +25,12 @@ public:
 	}
 	double operator*(const Vertex& ver)const {
 		return ver.x * x + ver.y * y + ver.z * z;
+	}
+	Vertex operator+(const Vertex& ver) const {
+		return Vertex(ver.x + x, ver.y + y, ver.z + z);
+	}
+	Vertex operator-(const Vertex& ver) const {
+		return Vertex(ver.x - x, ver.y - y, ver.z - z);
 	}
 };
 
@@ -120,9 +126,11 @@ public:
 		basisVectorV.y = basisVectorN.z * basisVectorU.x - basisVectorN.x * basisVectorU.z;
 		basisVectorV.z = basisVectorN.x * basisVectorU.y - basisVectorN.y * basisVectorU.x;
 	};
-	void setVectorBasis(double az, double zen) {
-		basisVectorN = Vertex(sin(zen) * sin(az), sin(zen) * cos(az), cos(zen));
-		basisVectorU = Vertex(sin(zen + M_PI / 2) * sin(az), sin(zen + M_PI / 2) * cos(az), cos(zen + M_PI / 2));
+	void setProjectionPlane(double az, double zen) {
+		azimut = az;
+		zenit = zen;
+		basisVectorN = Vertex(sin(zenit) * sin(azimut), sin(zenit) * cos(azimut), cos(zenit));
+		basisVectorU = Vertex(sin(zenit + M_PI / 2) * sin(azimut), sin(zenit + M_PI / 2) * cos(azimut), cos(zenit + M_PI / 2));
 		basisVectorV.x = basisVectorN.y * basisVectorU.z - basisVectorN.z * basisVectorU.y;
 		basisVectorV.y = basisVectorN.z * basisVectorU.x - basisVectorN.x * basisVectorU.z;
 		basisVectorV.z = basisVectorN.x * basisVectorU.y - basisVectorN.y * basisVectorU.x;

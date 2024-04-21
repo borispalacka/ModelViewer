@@ -690,13 +690,10 @@ void ViewerWidget::drawObject(Object_H_edge object, Camera camera, ProjectionPla
 }
 Object_H_edge ViewerWidget::perspectiveCoordSystemTransformation(Object_H_edge object) {
 	Object_H_edge transformedObject = object;
-	double dx = img->width() - camera.position.x;
-	double dy = img->height() - camera.position.y;
-	double dz = -camera.position.z;
 	for (Vertex* vertex : transformedObject.vertices) {
-		vertex->x = *vertex * projectionPlane.basisVectorV + dx;	//overload vector dot product 
-		vertex->y = *vertex * projectionPlane.basisVectorU + dy;
-		vertex->z = *vertex * projectionPlane.basisVectorN + dz;
+		vertex->x = img->width() / 2  - *vertex * projectionPlane.basisVectorV - camera.position.x;	//overload vector dot product 
+		vertex->y = img->height() / 2  - *vertex * projectionPlane.basisVectorU - camera.position.y;
+		vertex->z = *vertex * projectionPlane.basisVectorN - camera.position.z;
 	}
 	return transformedObject;
 }
