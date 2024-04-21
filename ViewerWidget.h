@@ -18,7 +18,7 @@ public:
 	H_edge* edge = nullptr;
 
 	Vertex() {}
-	Vertex(double x, double y, double z) : x(x), y(y), z(z), edge(nullptr) {}
+	Vertex(double x, double y, double z) : x(x), y(y), z(z), edge(nullptr) {};
 
 	bool operator==(const Vertex& ver) const {
 		return x == ver.x && y == ver.y && z == ver.z;
@@ -138,8 +138,8 @@ private:
 	QPainter* painter = nullptr;
 	uchar* data = nullptr;
 
-	Camera camera;
-	ProjectionPlane projectionPlane;
+	Camera camera = Camera(Vertex(0,0,0));
+	ProjectionPlane projectionPlane = ProjectionPlane(0,0,Vertex(0,0,0));
 
 	bool drawLineActivated = false;
 	QPoint drawLineBegin = QPoint(0, 0);
@@ -156,7 +156,7 @@ private:
 	bool croppedBySutherlandHodgman = false;
 
 	bool drawObjectActivated = false;
-	Object_H_edge drawObject = Object_H_edge();
+	Object_H_edge currentObject = Object_H_edge();
 
 
 	//Image Editing variables
@@ -198,8 +198,8 @@ public:
 	//3D OBJECT DRAW
 	void setDrawObjectActivated(bool state) { drawObjectActivated = state; }
 	bool getDrawObjectActivated() { return drawObjectActivated; }
-	void setDrawObject(Object_H_edge object) { drawObject = object; }
-	Object_H_edge getDrawObject() { return drawObject; }
+	void setCurrentObject(Object_H_edge object) { currentObject = object; }
+	Object_H_edge getCurrentObject() { return currentObject; }
 
 
 	//Image functions

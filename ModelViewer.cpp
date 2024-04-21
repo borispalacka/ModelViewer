@@ -20,8 +20,16 @@ ModelViewer::ModelViewer(QWidget* parent)
 	ui->pushButtonSetColor->setStyleSheet(style_sheet);
 	ui->doubleSpinBoxZenit->setMinimum(-M_PI);
 	ui->doubleSpinBoxZenit->setMaximum(M_PI);
+	ui->doubleSpinBoxZenit->setSingleStep(0.01);
 	ui->doubleSpinBoxAzimut->setMinimum(0);
 	ui->doubleSpinBoxAzimut->setMaximum(2 * M_PI);
+	ui->doubleSpinBoxZenit->setSingleStep(0.01);
+
+	//createUvSphereVTK(300, 30, 30, "sphere");
+	createCubeVTK(100, "cube");
+	vW->setCurrentObject(loadPolygonsVTK("cube"));
+	vW->setDrawObjectActivated(true);
+	vW->drawObject(vW->getCurrentObject(), vW->getCamera(), vW->getProjectionPlane());
 }
 
 // Event filters
@@ -684,14 +692,17 @@ void ModelViewer::on_pushButtonCreateVTK_clicked() {
 void ModelViewer::on_doubleSpinBoxZenit_valueChanged(double value) {
 	vW->getProjectionPlane().zenit = value;
 	vW->getProjectionPlane().setVectorBasis(vW->getProjectionPlane().azimut, value);
+	vW->clear();
 	if (vW->getDrawObjectActivated()) {
-		vW->drawObject(vW->getDrawObject(), vW->getCamera(), vW->getProjectionPlane());
+		vW->drawObject(vW->getCurrentObject(), vW->getCamera(), vW->getProjectionPlane());
 	}
 }
 void ModelViewer::on_doubleSpinBoxAzimut_valueChanged(double value) {
 	vW->getProjectionPlane().azimut = value;
 	vW->getProjectionPlane().setVectorBasis(value, vW->getProjectionPlane().zenit);
+	vW->clear();
 	if (vW->getDrawObjectActivated()) {
-		vW->drawObject(vW->getDrawObject(), vW->getCamera(), vW->getProjectionPlane());
+		vW->drawObject(vW->getCurrentObject(), vW->getCamera(), vW->getProjectionPlane());
 	}
+
 }
