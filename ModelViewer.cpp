@@ -1,6 +1,5 @@
 #include "ModelViewer.h"
 #include <cmath>
-#include "projection.h"
 
 ModelViewer::ModelViewer(QWidget* parent)
 	: QMainWindow(parent), ui(new Ui::ModelViewerClass)
@@ -227,7 +226,6 @@ void ModelViewer::ViewerWidgetMouseMove(ViewerWidget* w, QEvent* event)
 	}
 	w->update();
 }
-
 void ModelViewer::ViewerWidgetLeave(ViewerWidget* w, QEvent* event)
 {
 }

@@ -122,6 +122,7 @@ void ViewerWidget::setPixel(int x, int y, const QColor& color)
 }
 
 //Draw functions
+//2D draw functions
 void ViewerWidget::drawLine(QPoint start, QPoint end, QColor color, int algType)
 {
 	if (!croppedBySutherlandHodgman) {
@@ -669,6 +670,10 @@ void ViewerWidget::drawCurveCoons(QVector<QPoint> points, QColor color) {
 	}
 	update();
 }
+//3D draw functions
+void ViewerWidget::drawObject(Object_H_edge object, Camera camera, ProjectionPlane projectionPlane) {
+
+}
 
 //Crop functions
 QVector<QPoint> ViewerWidget::cyrusBeck(QPoint P1, QPoint P2) {
@@ -780,6 +785,8 @@ void ViewerWidget::paintEvent(QPaintEvent* event)
 	QRect area = event->rect();
 	painter.drawImage(area, *img, area);
 }
+
+//---------------------VTK file functions------------------------------
 
 void createCubeVTK(double d,QString filename) {
 	QVector<Vertex*> vertices = {
@@ -1097,3 +1104,5 @@ void createUvSphereVTK(double r, int longitude, int latitude, QString filename) 
 		qDebug() << "file wasnt opened succsesfully";
 	}
 }
+
+//---------------------------------------------------------------------

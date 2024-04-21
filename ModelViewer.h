@@ -19,6 +19,9 @@ private:
 	QColor globalColor;
 	QSettings settings;
 	QMessageBox msgBox;
+	Camera camera;
+	ProjectionPlane projectionPlane;
+	
 
 	//Event filters
 	bool eventFilter(QObject* obj, QEvent* event);
