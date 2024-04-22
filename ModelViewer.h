@@ -79,4 +79,6 @@ private slots:
 	void on_pushButtonCreateVTK_clicked();
 	void on_horizontalSliderZenit_valueChanged(int value);
 	void on_horizontalSliderAzimut_valueChanged(int value);
+	void on_comboBoxProjectionType_currentIndexChanged(int index);
+	void on_horizontalSliderCameraCoordZ_valueChanged(int value);
 };

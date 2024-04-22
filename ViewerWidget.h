@@ -243,8 +243,8 @@ public:
 	void drawCurveCoons(QVector<QPoint> points, QColor color);
 
 	//3D draw functions
-	void drawObject(Object_H_edge object, Camera camera, ProjectionPlane projectionPlane, int projectionType);
-	QVector<Vertex> perspectiveCoordSystemTransformation(Object_H_edge object);
+	void drawObject(const Object_H_edge& object, Camera camera, ProjectionPlane projectionPlane, int projectionType);
+	QVector<Vertex> perspectiveCoordSystemTransformation(const Object_H_edge& object, int projectionType);
 
 	QVector <QPoint> cyrusBeck(QPoint P1, QPoint P2);
 	QVector <QPoint> sutherlandHodgman(QVector<QPoint> V);

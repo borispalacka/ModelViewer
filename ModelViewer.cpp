@@ -19,12 +19,13 @@ ModelViewer::ModelViewer(QWidget* parent)
 	QString style_sheet = QString("background-color: #%1;").arg(globalColor.rgba(), 0, 16);
 	ui->pushButtonSetColor->setStyleSheet(style_sheet);
 
-	createUvSphereVTK(300, 10, 10, "sphere");
-	//createCubeVTK(300, "cube");
-	vW->setCurrentObject(loadPolygonsVTK("sphere"));
+	//createUvSphereVTK(300, 50, 50, "sphere");
+	createCubeVTK(300, "cube");
+	vW->setCurrentObject(loadPolygonsVTK("cube"));
 	vW->setDrawObjectActivated(true);
-	vW->drawObject(vW->getCurrentObject(), vW->getCamera(), vW->getProjectionPlane(), 0);
-
+	if (vW->getDrawObjectActivated()) {
+		vW->drawObject(vW->getCurrentObject(), vW->getCamera(), vW->getProjectionPlane(), ui->comboBoxProjectionType->currentIndex());
+	}
 }
 
 // Event filters
@@ -684,19 +685,44 @@ void ModelViewer::on_comboBoxTypeCreateVTK_currentIndexChanged(int index) {
 void ModelViewer::on_pushButtonCreateVTK_clicked() {
 
 }
+
 void ModelViewer::on_horizontalSliderZenit_valueChanged(int value) {
 	double radValue = value * M_PI / 180;
 	vW->getProjectionPlane().setProjectionPlane(vW->getProjectionPlane().azimut, radValue);
 	vW->clear();
+	qDebug() << ui->comboBoxProjectionType->currentIndex();
 	if (vW->getDrawObjectActivated()) {
-		vW->drawObject(vW->getCurrentObject(), vW->getCamera(), vW->getProjectionPlane(), 0);
+		vW->drawObject(vW->getCurrentObject(), vW->getCamera(), vW->getProjectionPlane(), ui->comboBoxProjectionType->currentIndex());
 	}
 }
 void ModelViewer::on_horizontalSliderAzimut_valueChanged(int value) {
 	double radValue = value * M_PI / 180;
 	vW->getProjectionPlane().setProjectionPlane(radValue, vW->getProjectionPlane().zenit);
 	vW->clear();
+	qDebug() << ui->comboBoxProjectionType->currentIndex();
 	if (vW->getDrawObjectActivated()) {
-		vW->drawObject(vW->getCurrentObject(), vW->getCamera(), vW->getProjectionPlane(), 0);
+		vW->drawObject(vW->getCurrentObject(), vW->getCamera(), vW->getProjectionPlane(), ui->comboBoxProjectionType->currentIndex());
+	}
+
+}
+
+void ModelViewer::on_comboBoxProjectionType_currentIndexChanged(int index) {
+	if (index == 1) {
+		ui->horizontalSliderCameraCoordZ->setEnabled(true);
+	}
+	else {
+		ui->horizontalSliderCameraCoordZ->setEnabled(false);
+	}
+	if (vW->getDrawObjectActivated()) {
+		vW->getCamera().position.z = ui->horizontalSliderCameraCoordZ->value();
+		vW->clear();
+		vW->drawObject(vW->getCurrentObject(), vW->getCamera(), vW->getProjectionPlane(), ui->comboBoxProjectionType->currentIndex());
+	}
+}
+void ModelViewer::on_horizontalSliderCameraCoordZ_valueChanged(int value) {
+	vW->getCamera().position.z = -value;
+	if (vW->getDrawObjectActivated()) {
+		vW->clear();
+		vW->drawObject(vW->getCurrentObject(), vW->getCamera(), vW->getProjectionPlane(), ui->comboBoxProjectionType->currentIndex());
 	}
 }

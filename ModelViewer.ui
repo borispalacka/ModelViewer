@@ -426,11 +426,32 @@
         <string>Edit Camera/Projection</string>
        </property>
        <layout class="QGridLayout" name="gridLayout_2">
+        <item row="2" column="0">
+         <widget class="QLabel" name="label_7">
+          <property name="text">
+           <string>Projection:</string>
+          </property>
+         </widget>
+        </item>
         <item row="0" column="0">
          <widget class="QLabel" name="label_5">
           <property name="text">
            <string>Zenit :</string>
           </property>
+         </widget>
+        </item>
+        <item row="2" column="1">
+         <widget class="QComboBox" name="comboBoxProjectionType">
+          <item>
+           <property name="text">
+            <string>Orthogonal</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Perspective</string>
+           </property>
+          </item>
          </widget>
         </item>
         <item row="1" column="0">
@@ -460,6 +481,29 @@
           </property>
           <property name="orientation">
            <enum>Qt::Horizontal</enum>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="1">
+         <widget class="QSlider" name="horizontalSliderCameraCoordZ">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="minimum">
+           <number>250</number>
+          </property>
+          <property name="maximum">
+           <number>2000</number>
+          </property>
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="0">
+         <widget class="QLabel" name="label_8">
+          <property name="text">
+           <string>Camera Z:</string>
           </property>
          </widget>
         </item>

@@ -232,7 +232,9 @@ void ViewerWidget::drawLineBresenham(QPoint start, QPoint end, QColor color) {
 			std::swap(start, end);
 		}
 		for (int y = start.y(); y <= end.y(); y++) {
-			setPixel(start.x(), y, color);
+			if (isInside(start.x(), y)) {
+				setPixel(start.x(), y, color);
+			}
 		}
 		return;
 	}
@@ -671,34 +673,59 @@ void ViewerWidget::drawCurveCoons(QVector<QPoint> points, QColor color) {
 	update();
 }
 //3D draw functions
-void ViewerWidget::drawObject(Object_H_edge object, Camera camera, ProjectionPlane projectionPlane, int projectionType) {
-	QVector<Vertex> oldVertices = perspectiveCoordSystemTransformation(object);
+void ViewerWidget::drawObject(const Object_H_edge& object, Camera camera, ProjectionPlane projectionPlane, int projectionType) {
+	//Storing old Vertices in vector , transforming object to projection coordinates
+	QVector<Vertex> oldVertices = perspectiveCoordSystemTransformation(object,projectionType );
+	//hash table to store drawed already drawed lines
 	QHash <H_edge*, H_edge*> pairDrawingMap;
 	for (H_edge* edge : object.edges) {
+		//skipping iteration if pair line was already drawn
 		if (edge->pair && pairDrawingMap.contains(edge->pair)) {
 			continue;
 		}
 		pairDrawingMap.insert(edge, edge->pair);
+		//transforming vertex to QPoint
 		QPoint lineStart = QPoint(static_cast<int>(edge->vert_origin->x), static_cast<int>(edge->vert_origin->y));
 		QPoint lineEnd = QPoint(static_cast<int>(edge->edge_next->vert_origin->x), static_cast<int>(edge->edge_next->vert_origin->y));
 		drawLine(lineStart, lineEnd, Qt::black, 1);
 	}
+
+	//updating old Vertices
 	for (int i = 0; i < object.vertices.length(); i++) {
 		*object.vertices[i] = oldVertices[i];
 	}
 	update();
 }
-QVector<Vertex> ViewerWidget::perspectiveCoordSystemTransformation(Object_H_edge object) {
+QVector<Vertex> ViewerWidget::perspectiveCoordSystemTransformation(const Object_H_edge& object, int projectionType) {
 	QVector<Vertex> oldVertices;
+	//Defining translation to center where better time complexity
 	double correctionX = static_cast<double>(img->width()) / 2;
 	double correctionY = static_cast<double>(img->height()) / 2;
+	//Transformation to world coordination
 	for (Vertex* vertex : object.vertices) {
-		Vertex oldVertex = *vertex;
-		oldVertices.append(oldVertex);
-		oldVertex.x = correctionX - (*vertex) * projectionPlane.basisVectorV;	//overload vector dot product 
-		oldVertex.y = correctionY - (*vertex) * projectionPlane.basisVectorU;
-		oldVertex.z = *vertex * projectionPlane.basisVectorN;
-		*vertex = oldVertex;
+		Vertex newVertex(0, 0, 0);
+		oldVertices.append(*vertex);
+		//calculating new projection coordinates
+		newVertex.x = (*vertex) * projectionPlane.basisVectorV;
+		newVertex.y = (*vertex) * projectionPlane.basisVectorU;
+		newVertex.z = *vertex * projectionPlane.basisVectorN;
+		if (projectionType == 0) {
+			newVertex = Vertex(correctionX, correctionY, 0) + newVertex;
+		}
+		*vertex = newVertex;
+	}
+	//Perspective Projection
+	if (projectionType == 1) {
+		for (Vertex* vertex : object.vertices) {
+			Vertex newVertex(0, 0, 0);
+			oldVertices.append(*vertex);
+			qDebug() << camera.position.z;
+			//calculating new projection coordinates
+			newVertex.x = camera.position.z * vertex->x / (camera.position.z - vertex->z);
+			newVertex.y = camera.position.z * vertex->y / (camera.position.z - vertex->z);
+			newVertex.z = 0;
+			*vertex = Vertex(correctionX, correctionY, 0) + newVertex;
+		}
 	}
 	return oldVertices;
 }
@@ -819,6 +846,7 @@ void createCubeVTK(double d,QString filename) {
 	QVector<Vertex*> vertices = {
 		new Vertex(0, 0, 0), new Vertex(0, d, 0), new Vertex(d, d, 0), new Vertex(d, 0, 0),
 		new Vertex(0,0,d), new Vertex(0,d,d), new Vertex(d,d,d), new Vertex(d,0,d) };
+
 	QFile file(filename + ".vtk");
 
 	if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
@@ -827,7 +855,7 @@ void createCubeVTK(double d,QString filename) {
 		out << "vtk output\nASCII\nDATASET POLYDATA\n";
 		out << "POINTS " << vertices.size() << " float\n";
 		for (int i = 0; i < vertices.size(); i++) {
-			out << vertices[i]->x << " " << vertices[i]->y << " " << vertices[i]->z << "\n";
+			out << vertices[i]->x  - d/2<< " " << vertices[i]->y  - d/2<< " " << vertices[i]->z - d/2<< "\n";
 		}
 		out << "POLYGONS 12 48\n";
 		out << "3 0 1 3\n";
