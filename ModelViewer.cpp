@@ -26,9 +26,9 @@ ModelViewer::ModelViewer(QWidget* parent)
 	ui->doubleSpinBoxAzimut->setMaximum(2 * M_PI);
 	ui->doubleSpinBoxAzimut->setSingleStep(0.01);
 
-	//createUvSphereVTK(300, 10, 10, "sphere");
-	createCubeVTK(300, "cube");
-	vW->setCurrentObject(loadPolygonsVTK("cube"));
+	createUvSphereVTK(300, 10, 10, "sphere");
+	//createCubeVTK(300, "cube");
+	vW->setCurrentObject(loadPolygonsVTK("sphere"));
 	ui->doubleSpinBoxAzimut->setValue(vW->getProjectionPlane().azimut);
 	ui->doubleSpinBoxZenit->setValue(vW->getProjectionPlane().zenit);
 	vW->setDrawObjectActivated(true);
@@ -706,5 +706,4 @@ void ModelViewer::on_doubleSpinBoxAzimut_valueChanged(double value) {
 	if (vW->getDrawObjectActivated()) {
 		vW->drawObject(vW->getCurrentObject(), vW->getCamera(), vW->getProjectionPlane());
 	}
-	qDebug() << vW->getProjectionPlane().azimut << vW->getProjectionPlane().zenit;
 }

@@ -128,13 +128,13 @@ void ViewerWidget::drawLine(QPoint start, QPoint end, QColor color, int algType)
 	if (!croppedBySutherlandHodgman) {
 		QVector<QPoint> newPoints = cyrusBeck(start, end);
 		if (newPoints.isEmpty()) {
-			qDebug() << "drawing line: none";
+			//qDebug() << "drawing line: none";
 			return;
 		}
 		else {
 			start = newPoints[0];
 			end = newPoints[1];
-			qDebug() << "drawing line: " << start << end;
+			//qDebug() << "drawing line: " << start << end;
 		}
 	}
 	if (algType == 0) { //DDA
@@ -672,7 +672,10 @@ void ViewerWidget::drawCurveCoons(QVector<QPoint> points, QColor color) {
 }
 //3D draw functions
 void ViewerWidget::drawObject(Object_H_edge object, Camera camera, ProjectionPlane projectionPlane) {
-	object = perspectiveCoordSystemTransformation(object);
+	QVector<Vertex> oldVertices = perspectiveCoordSystemTransformation(object);
+	for (Vertex* vertex : object.vertices) {
+		qDebug() << vertex->toString();
+	}
 	for (Face* face : object.faces) {
 		H_edge *edgeStart = face->edge;
 		H_edge* edgeNext = edgeStart->edge_next;
@@ -686,16 +689,23 @@ void ViewerWidget::drawObject(Object_H_edge object, Camera camera, ProjectionPla
 			drawLine(lineStart, lineEnd, Qt::black, 1);
 		}
 	}
+	for (int i = 0; i < object.vertices.length(); i++) {
+		*object.vertices[i] = oldVertices[i];
+		qDebug() << object.vertices[i]->toString();
+	}
 	update();
 }
-Object_H_edge ViewerWidget::perspectiveCoordSystemTransformation(Object_H_edge object) {
-	Object_H_edge transformedObject = object;
-	for (Vertex* vertex : transformedObject.vertices) {
-		vertex->x = static_cast<double>(img->width() / 2)  - (*vertex) * projectionPlane.basisVectorV - camera.position.x;	//overload vector dot product 
-		vertex->y = static_cast<double>(img->height() / 2)  - (*vertex) * projectionPlane.basisVectorU - camera.position.y;
-		vertex->z = *vertex * projectionPlane.basisVectorN - camera.position.z;
+QVector<Vertex> ViewerWidget::perspectiveCoordSystemTransformation(Object_H_edge object) {
+	QVector<Vertex> oldVertices;
+	for (Vertex* vertex : object.vertices) {
+		Vertex oldVertex = *vertex;
+		oldVertices.append(oldVertex);
+		vertex->x = static_cast<double>(img->width() / 2)  - (*vertex) * projectionPlane.basisVectorV;	//overload vector dot product 
+		vertex->y = static_cast<double>(img->height() / 2) -  (*vertex) * projectionPlane.basisVectorU;
+		vertex->z = *vertex * projectionPlane.basisVectorN;
+		qDebug() << oldVertex.toString() << "--->" << vertex->toString();
 	}
-	return transformedObject;
+	return oldVertices;
 }
 //Crop functions
 QVector<QPoint> ViewerWidget::cyrusBeck(QPoint P1, QPoint P2) {

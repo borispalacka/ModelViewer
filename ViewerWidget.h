@@ -1,4 +1,5 @@
 #pragma once
+
 #include <QtWidgets>
 #include <QVector>
 #include <algorithm>
@@ -20,6 +21,9 @@ public:
 	Vertex() {}
 	Vertex(double x, double y, double z) : x(x), y(y), z(z), edge(nullptr) {};
 
+	QString toString() {
+		return "Vertex({" + QString::number(x) + ", " + QString::number(y) + ", " + QString::number(z) + "})";
+	}
 	bool operator==(const Vertex& ver) const {
 		return x == ver.x && y == ver.y && z == ver.z;
 	}
@@ -147,7 +151,7 @@ private:
 	uchar* data = nullptr;
 
 	Camera camera = Camera(Vertex(0,0,0));
-	ProjectionPlane projectionPlane = ProjectionPlane(-0.2,0.5,Vertex(0,0,0));
+	ProjectionPlane projectionPlane = ProjectionPlane(0,0,Vertex(0,0,0));
 
 	bool drawLineActivated = false;
 	QPoint drawLineBegin = QPoint(0, 0);
@@ -240,7 +244,7 @@ public:
 
 	//3D draw functions
 	void drawObject(Object_H_edge object, Camera camera, ProjectionPlane projectionPlane);
-	Object_H_edge perspectiveCoordSystemTransformation(Object_H_edge object);
+	QVector<Vertex> perspectiveCoordSystemTransformation(Object_H_edge object);
 
 	QVector <QPoint> cyrusBeck(QPoint P1, QPoint P2);
 	QVector <QPoint> sutherlandHodgman(QVector<QPoint> V);
