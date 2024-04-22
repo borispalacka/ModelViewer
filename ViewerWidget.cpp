@@ -128,13 +128,13 @@ void ViewerWidget::drawLine(QPoint start, QPoint end, QColor color, int algType)
 	if (!croppedBySutherlandHodgman) {
 		QVector<QPoint> newPoints = cyrusBeck(start, end);
 		if (newPoints.isEmpty()) {
-			qDebug() << "drawing line: none";
+			//qDebug() << "drawing line: none";
 			return;
 		}
 		else {
 			start = newPoints[0];
 			end = newPoints[1];
-			qDebug() << "drawing line: " << start << end;
+			//qDebug() << "drawing line: " << start << end;
 		}
 	}
 	if (algType == 0) { //DDA
@@ -671,37 +671,32 @@ void ViewerWidget::drawCurveCoons(QVector<QPoint> points, QColor color) {
 	update();
 }
 //3D draw functions
-void ViewerWidget::drawObject(Object_H_edge object, Camera camera, ProjectionPlane projectionPlane) {
+void ViewerWidget::drawObject(Object_H_edge object, Camera camera, ProjectionPlane projectionPlane, int projectionType) {
 	QVector<Vertex> oldVertices = perspectiveCoordSystemTransformation(object);
-	for (Vertex* vertex : object.vertices) {
-		qDebug() << vertex->toString();
-	}
-	for (Face* face : object.faces) {
-		H_edge *edgeStart = face->edge;
-		H_edge* edgeNext = edgeStart->edge_next;
-		QPoint lineStart = QPoint(static_cast<int>(edgeStart->vert_origin->x),static_cast<int>( edgeStart->vert_origin->y));
-		QPoint lineEnd = QPoint(static_cast<int>(edgeNext->vert_origin->x), static_cast<int>(edgeNext->vert_origin->y));
-		drawLine(lineStart, lineEnd, Qt::black, 1);
-		while (edgeNext != face->edge) {
-			lineStart = QPoint(static_cast<int>(edgeNext->vert_origin->x), static_cast<int>(edgeNext->vert_origin->y));
-			edgeNext = edgeNext->edge_next;
-			lineEnd = QPoint(static_cast<int>(edgeNext->vert_origin->x), static_cast<int>(edgeNext->vert_origin->y));
-			drawLine(lineStart, lineEnd, Qt::black, 1);
+	QHash <H_edge*, H_edge*> pairDrawingMap;
+	for (H_edge* edge : object.edges) {
+		if (edge->pair && pairDrawingMap.contains(edge->pair)) {
+			continue;
 		}
+		pairDrawingMap.insert(edge, edge->pair);
+		QPoint lineStart = QPoint(static_cast<int>(edge->vert_origin->x), static_cast<int>(edge->vert_origin->y));
+		QPoint lineEnd = QPoint(static_cast<int>(edge->edge_next->vert_origin->x), static_cast<int>(edge->edge_next->vert_origin->y));
+		drawLine(lineStart, lineEnd, Qt::black, 1);
 	}
 	for (int i = 0; i < object.vertices.length(); i++) {
 		*object.vertices[i] = oldVertices[i];
-		qDebug() << object.vertices[i]->toString();
 	}
 	update();
 }
 QVector<Vertex> ViewerWidget::perspectiveCoordSystemTransformation(Object_H_edge object) {
 	QVector<Vertex> oldVertices;
+	double correctionX = static_cast<double>(img->width()) / 2;
+	double correctionY = static_cast<double>(img->height()) / 2;
 	for (Vertex* vertex : object.vertices) {
 		Vertex oldVertex = *vertex;
 		oldVertices.append(oldVertex);
-		oldVertex.x = static_cast<double>(img->width() / 2)  - (*vertex) * projectionPlane.basisVectorV;	//overload vector dot product 
-		oldVertex.y = static_cast<double>(img->height() / 2) -  (*vertex) * projectionPlane.basisVectorU;
+		oldVertex.x = correctionX - (*vertex) * projectionPlane.basisVectorV;	//overload vector dot product 
+		oldVertex.y = correctionY - (*vertex) * projectionPlane.basisVectorU;
 		oldVertex.z = *vertex * projectionPlane.basisVectorN;
 		*vertex = oldVertex;
 	}

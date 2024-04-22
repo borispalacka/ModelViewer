@@ -243,7 +243,7 @@ public:
 	void drawCurveCoons(QVector<QPoint> points, QColor color);
 
 	//3D draw functions
-	void drawObject(Object_H_edge object, Camera camera, ProjectionPlane projectionPlane);
+	void drawObject(Object_H_edge object, Camera camera, ProjectionPlane projectionPlane, int projectionType);
 	QVector<Vertex> perspectiveCoordSystemTransformation(Object_H_edge object);
 
 	QVector <QPoint> cyrusBeck(QPoint P1, QPoint P2);

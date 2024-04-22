@@ -5,7 +5,7 @@ ModelViewer::ModelViewer(QWidget* parent)
 	: QMainWindow(parent), ui(new Ui::ModelViewerClass)
 {
 	ui->setupUi(this);
-	vW = new ViewerWidget(QSize(500, 500));
+	vW = new ViewerWidget(QSize(700, 700));
 	ui->scrollArea->setWidget(vW);
 	ui->scrollArea->setBackgroundRole(QPalette::Dark);
 	ui->scrollArea->setWidgetResizable(true);
@@ -19,18 +19,11 @@ ModelViewer::ModelViewer(QWidget* parent)
 	QString style_sheet = QString("background-color: #%1;").arg(globalColor.rgba(), 0, 16);
 	ui->pushButtonSetColor->setStyleSheet(style_sheet);
 
-	ui->doubleSpinBoxZenit->setMinimum(-M_PI);
-	ui->doubleSpinBoxZenit->setMaximum(M_PI);
-	ui->doubleSpinBoxZenit->setSingleStep(0.01);
-	ui->doubleSpinBoxAzimut->setMinimum(0);
-	ui->doubleSpinBoxAzimut->setMaximum(2 * M_PI);
-	ui->doubleSpinBoxAzimut->setSingleStep(0.01);
-
-	createUvSphereVTK(100, 10, 10, "sphere");
+	createUvSphereVTK(300, 10, 10, "sphere");
 	//createCubeVTK(300, "cube");
 	vW->setCurrentObject(loadPolygonsVTK("sphere"));
 	vW->setDrawObjectActivated(true);
-	vW->drawObject(vW->getCurrentObject(), vW->getCamera(), vW->getProjectionPlane());
+	vW->drawObject(vW->getCurrentObject(), vW->getCamera(), vW->getProjectionPlane(), 0);
 
 }
 
@@ -691,17 +684,19 @@ void ModelViewer::on_comboBoxTypeCreateVTK_currentIndexChanged(int index) {
 void ModelViewer::on_pushButtonCreateVTK_clicked() {
 
 }
-void ModelViewer::on_doubleSpinBoxZenit_valueChanged(double value) {
-	vW->getProjectionPlane().setProjectionPlane(vW->getProjectionPlane().azimut, value);
+void ModelViewer::on_horizontalSliderZenit_valueChanged(int value) {
+	double radValue = value * M_PI / 180;
+	vW->getProjectionPlane().setProjectionPlane(vW->getProjectionPlane().azimut, radValue);
 	vW->clear();
 	if (vW->getDrawObjectActivated()) {
-		vW->drawObject(vW->getCurrentObject(), vW->getCamera(), vW->getProjectionPlane());
+		vW->drawObject(vW->getCurrentObject(), vW->getCamera(), vW->getProjectionPlane(), 0);
 	}
 }
-void ModelViewer::on_doubleSpinBoxAzimut_valueChanged(double value) {
-	vW->getProjectionPlane().setProjectionPlane(value, vW->getProjectionPlane().zenit);
+void ModelViewer::on_horizontalSliderAzimut_valueChanged(int value) {
+	double radValue = value * M_PI / 180;
+	vW->getProjectionPlane().setProjectionPlane(radValue, vW->getProjectionPlane().zenit);
 	vW->clear();
 	if (vW->getDrawObjectActivated()) {
-		vW->drawObject(vW->getCurrentObject(), vW->getCamera(), vW->getProjectionPlane());
+		vW->drawObject(vW->getCurrentObject(), vW->getCamera(), vW->getProjectionPlane(), 0);
 	}
 }

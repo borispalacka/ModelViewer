@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1357</width>
+    <width>1243</width>
     <height>902</height>
    </rect>
   </property>
@@ -25,7 +25,7 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>1092</width>
+         <width>980</width>
          <height>827</height>
         </rect>
        </property>
@@ -39,7 +39,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1357</width>
+     <width>1243</width>
      <height>22</height>
     </rect>
    </property>
@@ -433,9 +433,6 @@
           </property>
          </widget>
         </item>
-        <item row="0" column="1">
-         <widget class="QDoubleSpinBox" name="doubleSpinBoxZenit"/>
-        </item>
         <item row="1" column="0">
          <widget class="QLabel" name="label_6">
           <property name="text">
@@ -443,8 +440,28 @@
           </property>
          </widget>
         </item>
+        <item row="0" column="1">
+         <widget class="QSlider" name="horizontalSliderZenit">
+          <property name="minimum">
+           <number>-90</number>
+          </property>
+          <property name="maximum">
+           <number>90</number>
+          </property>
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+         </widget>
+        </item>
         <item row="1" column="1">
-         <widget class="QDoubleSpinBox" name="doubleSpinBoxAzimut"/>
+         <widget class="QSlider" name="horizontalSliderAzimut">
+          <property name="maximum">
+           <number>360</number>
+          </property>
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+         </widget>
         </item>
        </layout>
       </widget>

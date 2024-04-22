@@ -77,6 +77,6 @@ private slots:
 	//3D mode 
 	void on_comboBoxTypeCreateVTK_currentIndexChanged(int index);
 	void on_pushButtonCreateVTK_clicked();
-	void on_doubleSpinBoxZenit_valueChanged(double value);
-	void on_doubleSpinBoxAzimut_valueChanged(double value);
+	void on_horizontalSliderZenit_valueChanged(int value);
+	void on_horizontalSliderAzimut_valueChanged(int value);
 };
