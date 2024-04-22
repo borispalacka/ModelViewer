@@ -128,13 +128,13 @@ void ViewerWidget::drawLine(QPoint start, QPoint end, QColor color, int algType)
 	if (!croppedBySutherlandHodgman) {
 		QVector<QPoint> newPoints = cyrusBeck(start, end);
 		if (newPoints.isEmpty()) {
-			//qDebug() << "drawing line: none";
+			qDebug() << "drawing line: none";
 			return;
 		}
 		else {
 			start = newPoints[0];
 			end = newPoints[1];
-			//qDebug() << "drawing line: " << start << end;
+			qDebug() << "drawing line: " << start << end;
 		}
 	}
 	if (algType == 0) { //DDA
@@ -700,10 +700,10 @@ QVector<Vertex> ViewerWidget::perspectiveCoordSystemTransformation(Object_H_edge
 	for (Vertex* vertex : object.vertices) {
 		Vertex oldVertex = *vertex;
 		oldVertices.append(oldVertex);
-		vertex->x = static_cast<double>(img->width() / 2)  - (*vertex) * projectionPlane.basisVectorV;	//overload vector dot product 
-		vertex->y = static_cast<double>(img->height() / 2) -  (*vertex) * projectionPlane.basisVectorU;
-		vertex->z = *vertex * projectionPlane.basisVectorN;
-		qDebug() << oldVertex.toString() << "--->" << vertex->toString();
+		oldVertex.x = static_cast<double>(img->width() / 2)  - (*vertex) * projectionPlane.basisVectorV;	//overload vector dot product 
+		oldVertex.y = static_cast<double>(img->height() / 2) -  (*vertex) * projectionPlane.basisVectorU;
+		oldVertex.z = *vertex * projectionPlane.basisVectorN;
+		*vertex = oldVertex;
 	}
 	return oldVertices;
 }

@@ -5,7 +5,7 @@ ModelViewer::ModelViewer(QWidget* parent)
 	: QMainWindow(parent), ui(new Ui::ModelViewerClass)
 {
 	ui->setupUi(this);
-	vW = new ViewerWidget(QSize(1000, 750));
+	vW = new ViewerWidget(QSize(500, 500));
 	ui->scrollArea->setWidget(vW);
 	ui->scrollArea->setBackgroundRole(QPalette::Dark);
 	ui->scrollArea->setWidgetResizable(true);
@@ -26,11 +26,9 @@ ModelViewer::ModelViewer(QWidget* parent)
 	ui->doubleSpinBoxAzimut->setMaximum(2 * M_PI);
 	ui->doubleSpinBoxAzimut->setSingleStep(0.01);
 
-	createUvSphereVTK(300, 10, 10, "sphere");
+	createUvSphereVTK(100, 10, 10, "sphere");
 	//createCubeVTK(300, "cube");
 	vW->setCurrentObject(loadPolygonsVTK("sphere"));
-	ui->doubleSpinBoxAzimut->setValue(vW->getProjectionPlane().azimut);
-	ui->doubleSpinBoxZenit->setValue(vW->getProjectionPlane().zenit);
 	vW->setDrawObjectActivated(true);
 	vW->drawObject(vW->getCurrentObject(), vW->getCamera(), vW->getProjectionPlane());
 
