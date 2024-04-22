@@ -18,6 +18,7 @@ ModelViewer::ModelViewer(QWidget* parent)
 	globalColor = Qt::blue;
 	QString style_sheet = QString("background-color: #%1;").arg(globalColor.rgba(), 0, 16);
 	ui->pushButtonSetColor->setStyleSheet(style_sheet);
+
 	ui->doubleSpinBoxZenit->setMinimum(-M_PI);
 	ui->doubleSpinBoxZenit->setMaximum(M_PI);
 	ui->doubleSpinBoxZenit->setSingleStep(0.01);
@@ -25,11 +26,14 @@ ModelViewer::ModelViewer(QWidget* parent)
 	ui->doubleSpinBoxAzimut->setMaximum(2 * M_PI);
 	ui->doubleSpinBoxAzimut->setSingleStep(0.01);
 
-	createUvSphereVTK(300, 10, 10, "sphere");
-	//createCubeVTK(100, "cube");
-	vW->setCurrentObject(loadPolygonsVTK("sphere"));
+	//createUvSphereVTK(300, 10, 10, "sphere");
+	createCubeVTK(300, "cube");
+	vW->setCurrentObject(loadPolygonsVTK("cube"));
+	ui->doubleSpinBoxAzimut->setValue(vW->getProjectionPlane().azimut);
+	ui->doubleSpinBoxZenit->setValue(vW->getProjectionPlane().zenit);
 	vW->setDrawObjectActivated(true);
 	vW->drawObject(vW->getCurrentObject(), vW->getCamera(), vW->getProjectionPlane());
+
 }
 
 // Event filters
@@ -702,5 +706,5 @@ void ModelViewer::on_doubleSpinBoxAzimut_valueChanged(double value) {
 	if (vW->getDrawObjectActivated()) {
 		vW->drawObject(vW->getCurrentObject(), vW->getCamera(), vW->getProjectionPlane());
 	}
-
+	qDebug() << vW->getProjectionPlane().azimut << vW->getProjectionPlane().zenit;
 }

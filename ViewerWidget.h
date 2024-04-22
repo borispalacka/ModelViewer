@@ -120,8 +120,8 @@ public:
 	ProjectionPlane() {};
 	ProjectionPlane(double az, double zen, Vertex vectorNormal) :
 		azimut(az), zenit(zen), normalVector(vectorNormal) {
-		basisVectorN = Vertex(sin(zen) * sin(az), sin(zen) * cos(az), cos(zen));
-		basisVectorU = Vertex(sin(zen + M_PI / 2) * sin(az), sin(zen + M_PI / 2) * cos(az), cos(zen + M_PI / 2));
+		basisVectorN = Vertex(sin(zenit) * sin(azimut), sin(zenit) * cos(azimut), cos(zenit));
+		basisVectorU = Vertex(sin(zenit + M_PI / 2) * sin(azimut), sin(zenit + M_PI / 2) * cos(azimut), cos(zenit + M_PI / 2));
 		basisVectorV.x = basisVectorN.y * basisVectorU.z - basisVectorN.z * basisVectorU.y;
 		basisVectorV.y = basisVectorN.z * basisVectorU.x - basisVectorN.x * basisVectorU.z;
 		basisVectorV.z = basisVectorN.x * basisVectorU.y - basisVectorN.y * basisVectorU.x;
@@ -147,7 +147,7 @@ private:
 	uchar* data = nullptr;
 
 	Camera camera = Camera(Vertex(0,0,0));
-	ProjectionPlane projectionPlane = ProjectionPlane(0,0,Vertex(0,0,0));
+	ProjectionPlane projectionPlane = ProjectionPlane(-0.2,0.5,Vertex(0,0,0));
 
 	bool drawLineActivated = false;
 	QPoint drawLineBegin = QPoint(0, 0);
