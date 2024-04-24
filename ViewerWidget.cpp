@@ -3,6 +3,7 @@
 #include <QFile>
 #include <regex>
 #include <QHash>
+#include <random>
 
 #define VTK_FILE_HEADER "#vtk DataFile Version 3.0\nvtk output\nASCII\nDATASET POLYDATA\n"
 
@@ -336,6 +337,16 @@ void ViewerWidget::drawPolygon(QVector<QPoint> points, QColor color, int algType
 		return;
 	}
 	points = tmpPoints;
+	bool isHorizontalLine = std::all_of(points.begin(), points.end(), [&](const QPoint& point) {
+		return point.y() == points[0].y();
+		});
+	bool isVerticalLine = std::all_of(points.begin(), points.end(), [&](const QPoint& point) {
+		return point.x() == points[0].x();
+		});
+	if (isHorizontalLine || isVerticalLine) {
+		qDebug() << "drawing polygon : none";
+		return;
+	}
 	qDebug() << "drawing polygon : " << points;
 	croppedBySutherlandHodgman = true;
 	if (fillingAlgType == 0) {
@@ -522,7 +533,9 @@ void ViewerWidget::fillTriangle(QVector<QPoint> currentPoints, QVector<QPoint> o
 				else if (fillAlgType == 3) {
 					color = fillTriangleBaricentric(oldPoints, QPoint(x, y), colors);
 				}
-				setPixel(x, y, color);
+				if (isInside(x, y)) {
+					setPixel(x, y, color);
+				}
 			}
 		}
 		x1 += 1 / edges[0].m;
@@ -673,28 +686,55 @@ void ViewerWidget::drawCurveCoons(QVector<QPoint> points, QColor color) {
 	update();
 }
 //3D draw functions
-void ViewerWidget::drawObject(const Object_H_edge& object, Camera camera, ProjectionPlane projectionPlane, int projectionType) {
+void ViewerWidget::drawObject(const Object_H_edge& object, Camera camera, ProjectionPlane projectionPlane, int projectionType, int representationType) {
 	//Storing old Vertices in vector , transforming object to projection coordinates
 	QVector<Vertex> oldVertices = perspectiveCoordSystemTransformation(object,projectionType );
-	//hash table to store drawed already drawed lines
-	QHash <H_edge*, H_edge*> pairDrawingMap;
-	for (H_edge* edge : object.edges) {
-		//skipping iteration if pair line was already drawn
-		if (edge->pair && pairDrawingMap.contains(edge->pair)) {
-			continue;
+
+	//Wireframe-Model
+	if (representationType == 0) {
+		//hash table to store drawed already drawed lines
+		QHash <H_edge*, H_edge*> pairDrawingMap;
+		for (H_edge* edge : object.edges) {
+			//skipping iteration if pair line was already drawn
+			if (edge->pair && pairDrawingMap.contains(edge->pair)) {
+				continue;
+			}
+			pairDrawingMap.insert(edge, edge->pair);
+			//transforming vertex to QPoint
+			QPoint lineStart = QPoint(static_cast<int>(edge->vert_origin->x), static_cast<int>(edge->vert_origin->y));
+			QPoint lineEnd = QPoint(static_cast<int>(edge->edge_next->vert_origin->x), static_cast<int>(edge->edge_next->vert_origin->y));
+			drawLine(lineStart, lineEnd, Qt::black, 1);
 		}
-		pairDrawingMap.insert(edge, edge->pair);
-		//transforming vertex to QPoint
-		QPoint lineStart = QPoint(static_cast<int>(edge->vert_origin->x), static_cast<int>(edge->vert_origin->y));
-		QPoint lineEnd = QPoint(static_cast<int>(edge->edge_next->vert_origin->x), static_cast<int>(edge->edge_next->vert_origin->y));
-		drawLine(lineStart, lineEnd, Qt::black, 1);
 	}
+	//Surface-Representation
+	else if (representationType == 1) {
+		std::random_device rd;
+		std::mt19937 gen(rd());
+		std::uniform_int_distribution<int> dis(0, 255);
+		for (Face* face : object.faces) {
+			QColor currentColor(dis(gen), dis(gen), dis(gen), 255);
+			QVector<QPoint> polygonPoints;
+			H_edge edge = *face->edge;
+			polygonPoints.append(edge.vert_origin->toQPointXY());
+			qDebug() << currentColor;
+			while (edge.edge_next->vert_origin->toQPointXY() != polygonPoints.first()) {
+				edge = *edge.edge_next;
+				polygonPoints.append(edge.vert_origin->toQPointXY());
+			}
+			qDebug() << polygonPoints;
+			drawPolygon(polygonPoints, currentColor, 1, 4);
+		}
+	}
+
 
 	//updating old Vertices
 	for (int i = 0; i < object.vertices.length(); i++) {
 		*object.vertices[i] = oldVertices[i];
 	}
 	update();
+}
+QVector<QColor> ViewerWidget::zBuffer(const Object_H_edge& object) {
+	return QVector<QColor>();
 }
 QVector<Vertex> ViewerWidget::perspectiveCoordSystemTransformation(const Object_H_edge& object, int projectionType) {
 	QVector<Vertex> oldVertices;

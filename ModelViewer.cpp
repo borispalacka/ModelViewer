@@ -24,7 +24,7 @@ ModelViewer::ModelViewer(QWidget* parent)
 	vW->setCurrentObject(loadPolygonsVTK("cube"));
 	vW->setDrawObjectActivated(true);
 	if (vW->getDrawObjectActivated()) {
-		vW->drawObject(vW->getCurrentObject(), vW->getCamera(), vW->getProjectionPlane(), ui->comboBoxProjectionType->currentIndex());
+		vW->drawObject(vW->getCurrentObject(), vW->getCamera(), vW->getProjectionPlane(), ui->comboBoxProjectionType->currentIndex(), ui->comboBoxRepresentationType->currentIndex());
 	}
 }
 
@@ -692,7 +692,7 @@ void ModelViewer::on_horizontalSliderZenit_valueChanged(int value) {
 	vW->clear();
 	qDebug() << ui->comboBoxProjectionType->currentIndex();
 	if (vW->getDrawObjectActivated()) {
-		vW->drawObject(vW->getCurrentObject(), vW->getCamera(), vW->getProjectionPlane(), ui->comboBoxProjectionType->currentIndex());
+		vW->drawObject(vW->getCurrentObject(), vW->getCamera(), vW->getProjectionPlane(), ui->comboBoxProjectionType->currentIndex(), ui->comboBoxRepresentationType->currentIndex());
 	}
 }
 void ModelViewer::on_horizontalSliderAzimut_valueChanged(int value) {
@@ -701,7 +701,7 @@ void ModelViewer::on_horizontalSliderAzimut_valueChanged(int value) {
 	vW->clear();
 	qDebug() << ui->comboBoxProjectionType->currentIndex();
 	if (vW->getDrawObjectActivated()) {
-		vW->drawObject(vW->getCurrentObject(), vW->getCamera(), vW->getProjectionPlane(), ui->comboBoxProjectionType->currentIndex());
+		vW->drawObject(vW->getCurrentObject(), vW->getCamera(), vW->getProjectionPlane(), ui->comboBoxProjectionType->currentIndex(), ui->comboBoxRepresentationType->currentIndex());
 	}
 
 }
@@ -716,13 +716,13 @@ void ModelViewer::on_comboBoxProjectionType_currentIndexChanged(int index) {
 	if (vW->getDrawObjectActivated()) {
 		vW->getCamera().position.z = ui->horizontalSliderCameraCoordZ->value();
 		vW->clear();
-		vW->drawObject(vW->getCurrentObject(), vW->getCamera(), vW->getProjectionPlane(), ui->comboBoxProjectionType->currentIndex());
+		vW->drawObject(vW->getCurrentObject(), vW->getCamera(), vW->getProjectionPlane(), ui->comboBoxProjectionType->currentIndex(), ui->comboBoxRepresentationType->currentIndex());
 	}
 }
 void ModelViewer::on_horizontalSliderCameraCoordZ_valueChanged(int value) {
 	vW->getCamera().position.z = -value;
 	if (vW->getDrawObjectActivated()) {
 		vW->clear();
-		vW->drawObject(vW->getCurrentObject(), vW->getCamera(), vW->getProjectionPlane(), ui->comboBoxProjectionType->currentIndex());
+		vW->drawObject(vW->getCurrentObject(), vW->getCamera(), vW->getProjectionPlane(), ui->comboBoxProjectionType->currentIndex(), ui->comboBoxRepresentationType->currentIndex());
 	}
 }

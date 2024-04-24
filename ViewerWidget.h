@@ -24,6 +24,7 @@ public:
 	QString toString() {
 		return "Vertex({" + QString::number(x) + ", " + QString::number(y) + ", " + QString::number(z) + "})";
 	}
+	QPoint toQPointXY() { return QPoint(static_cast<int> (x), static_cast<int> (y)); }
 	bool operator==(const Vertex& ver) const {
 		return x == ver.x && y == ver.y && z == ver.z;
 	}
@@ -117,7 +118,7 @@ public:
 	double azimut = 0;
 	double zenit = 0;
 	Vertex normalVector = Vertex(0, 0, 0);
-	//Basis vectors for perspective Coordinate System
+	//Basis vectors for projection Coordinate System
 	Vertex basisVectorN = Vertex(0, 0, 0);
 	Vertex basisVectorU = Vertex(0, 0, 0);
 	Vertex basisVectorV = Vertex(0, 0, 0);
@@ -152,6 +153,8 @@ private:
 
 	Camera camera = Camera(Vertex(0,0,0));
 	ProjectionPlane projectionPlane = ProjectionPlane(0,0,Vertex(0,0,0));
+	QHash<QPair<int, int>, QColor> mapOfColors;
+	QHash<QPair<int, int>, double> mapOfZCoords;
 
 	bool drawLineActivated = false;
 	QPoint drawLineBegin = QPoint(0, 0);
@@ -243,9 +246,9 @@ public:
 	void drawCurveCoons(QVector<QPoint> points, QColor color);
 
 	//3D draw functions
-	void drawObject(const Object_H_edge& object, Camera camera, ProjectionPlane projectionPlane, int projectionType);
+	void drawObject(const Object_H_edge& object, Camera camera, ProjectionPlane projectionPlane, int projectionType, int representationType);
 	QVector<Vertex> perspectiveCoordSystemTransformation(const Object_H_edge& object, int projectionType);
-
+	QVector<QColor> zBuffer(const Object_H_edge& object);
 	QVector <QPoint> cyrusBeck(QPoint P1, QPoint P2);
 	QVector <QPoint> sutherlandHodgman(QVector<QPoint> V);
 
