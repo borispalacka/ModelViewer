@@ -690,7 +690,6 @@ void ModelViewer::on_horizontalSliderZenit_valueChanged(int value) {
 	double radValue = value * M_PI / 180;
 	vW->getProjectionPlane().setProjectionPlane(vW->getProjectionPlane().azimut, radValue);
 	vW->clear();
-	qDebug() << ui->comboBoxProjectionType->currentIndex();
 	if (vW->getDrawObjectActivated()) {
 		vW->drawObject(vW->getCurrentObject(), vW->getCamera(), vW->getProjectionPlane(), ui->comboBoxProjectionType->currentIndex(), ui->comboBoxRepresentationType->currentIndex());
 	}
@@ -699,7 +698,6 @@ void ModelViewer::on_horizontalSliderAzimut_valueChanged(int value) {
 	double radValue = value * M_PI / 180;
 	vW->getProjectionPlane().setProjectionPlane(radValue, vW->getProjectionPlane().zenit);
 	vW->clear();
-	qDebug() << ui->comboBoxProjectionType->currentIndex();
 	if (vW->getDrawObjectActivated()) {
 		vW->drawObject(vW->getCurrentObject(), vW->getCamera(), vW->getProjectionPlane(), ui->comboBoxProjectionType->currentIndex(), ui->comboBoxRepresentationType->currentIndex());
 	}
@@ -720,7 +718,7 @@ void ModelViewer::on_comboBoxProjectionType_currentIndexChanged(int index) {
 	}
 }
 void ModelViewer::on_horizontalSliderCameraCoordZ_valueChanged(int value) {
-	vW->getCamera().position.z = -value;
+	vW->getCamera().position.z = value;
 	if (vW->getDrawObjectActivated()) {
 		vW->clear();
 		vW->drawObject(vW->getCurrentObject(), vW->getCamera(), vW->getProjectionPlane(), ui->comboBoxProjectionType->currentIndex(), ui->comboBoxRepresentationType->currentIndex());

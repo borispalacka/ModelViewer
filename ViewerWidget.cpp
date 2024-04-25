@@ -513,6 +513,7 @@ void ViewerWidget::fillTriangle(QVector<QPoint> currentPoints, QVector<QPoint> o
 			edge.m = static_cast<double>(end.y() - start.y()) / (end.x() - start.x());
 			edges.append(edge);
 		}
+
 		start = currentPoints[i];
 	}
 	if (edges[0].end.x() != edges[1].end.x()) {
@@ -692,7 +693,7 @@ void ViewerWidget::drawObject(const Object_H_edge& object, Camera camera, Projec
 
 	//Wireframe-Model
 	if (representationType == 0) {
-		//hash table to store drawed already drawed lines
+		//hash table to store already drawed lines
 		QHash <H_edge*, H_edge*> pairDrawingMap;
 		for (H_edge* edge : object.edges) {
 			//skipping iteration if pair line was already drawn
@@ -708,21 +709,15 @@ void ViewerWidget::drawObject(const Object_H_edge& object, Camera camera, Projec
 	}
 	//Surface-Representation
 	else if (representationType == 1) {
-		std::random_device rd;
-		std::mt19937 gen(rd());
-		std::uniform_int_distribution<int> dis(0, 255);
 		for (Face* face : object.faces) {
-			QColor currentColor(dis(gen), dis(gen), dis(gen), 255);
-			QVector<QPoint> polygonPoints;
+			QVector<Vertex*> polygonVertices;
 			H_edge edge = *face->edge;
-			polygonPoints.append(edge.vert_origin->toQPointXY());
-			qDebug() << currentColor;
-			while (edge.edge_next->vert_origin->toQPointXY() != polygonPoints.first()) {
+			polygonVertices.append(edge.vert_origin);
+			while (edge.edge_next->vert_origin != polygonVertices.first()) {
 				edge = *edge.edge_next;
-				polygonPoints.append(edge.vert_origin->toQPointXY());
+				polygonVertices.append(edge.vert_origin);
 			}
-			qDebug() << polygonPoints;
-			drawPolygon(polygonPoints, currentColor, 1, 4);
+			fillObjectPolygonSetup(polygonVertices, object.colors.value(face), 1);
 		}
 	}
 
@@ -732,6 +727,8 @@ void ViewerWidget::drawObject(const Object_H_edge& object, Camera camera, Projec
 		*object.vertices[i] = oldVertices[i];
 	}
 	update();
+	mapOfColors.clear();
+	mapOfZCoords.clear();
 }
 QVector<QColor> ViewerWidget::zBuffer(const Object_H_edge& object) {
 	return QVector<QColor>();
@@ -769,6 +766,129 @@ QVector<Vertex> ViewerWidget::perspectiveCoordSystemTransformation(const Object_
 	}
 	return oldVertices;
 }
+double ViewerWidget::baricentricInterpolation(const QVector<Vertex*> vertices, Vertex* currentVertex) {
+	QVector<Vertex*> T = vertices;
+	Vertex* P = currentVertex;
+	double lambda[3];
+	lambda[0] = abs((T[1]->x - P->x) * (T[2]->y - P->y) - (T[1]->y - P->y) * (T[2]->x - P->x));
+	lambda[0] /= abs(static_cast<double>(T[1]->x - T[0]->x) * (T[2]->y - T[0]->y) - (T[1]->y - T[0]->y) * (T[2]->x - T[0]->x));
+
+	lambda[1] = abs((T[0]->x - P->x) * (T[2]->y - P->y) - (T[0]->y - P->y) * (T[2]->x - P->x));
+	lambda[1] /= abs(static_cast<double>(T[1]->x - T[0]->x) * (T[2]->y - T[0]->y) - (T[1]->y - T[0]->y) * (T[2]->x - T[0]->x));
+
+	lambda[2] = 1 - lambda[0] - lambda[1];
+
+	return T[0]->z * lambda[0] + T[1]->z * lambda[1] + T[2]->z * lambda[2];
+}
+void ViewerWidget::fillObjectPolygonSetup(const QVector<Vertex*> vertices, QColor color, int fillAlgType) {
+
+	QVector<Vertex*> T = vertices;
+	
+	//Sorting all vertices primarly with their y-coordinate and secondary with their x-coordinate
+	std::sort(T.begin(), T.end(), [](const Vertex* vertex1, const Vertex* vertex2) {
+		if (vertex1->y < vertex2->y || vertex1->y == vertex2->y && vertex1->x < vertex2->x) {
+			return TRUE;
+		}
+		else {
+			return FALSE;
+		}
+		});
+	if (T[0]->y == T[1]->y || T[1]->y == T[2]->y) {
+		fillObjectPolygon(T, color, fillAlgType);
+		return;
+	}
+	double m = static_cast<double>(T[2]->y - T[0]->y) / (T[2]->x - T[0]->x);
+	Vertex *P = new Vertex((T[1]->y - T[0]->y) / m + T[0]->x, T[1]->y,0);
+	P->z = baricentricInterpolation(T, P);
+	if (T[1]->x < P->x) {
+		fillObjectPolygon({ T[0],T[1],P }, color, fillAlgType);
+		fillObjectPolygon({ T[1], P, T[2] }, color, fillAlgType);
+	}
+	else {
+		fillObjectPolygon({ T[0], P, T[1] },  color, fillAlgType);
+		fillObjectPolygon({ P,T[1],T[2] },  color, fillAlgType);
+	}
+}
+void ViewerWidget::fillObjectPolygon(const QVector<Vertex*> vertices, QColor color, int fillAlgType) {
+	struct Edge {
+		Vertex start;
+		Vertex end;
+		double m = 0;
+	};
+
+
+	auto interpolation = [](QVector<Vertex*> T, Vertex* P)->double {
+		double lambda[3];
+		double divider = abs(static_cast<double>(T[1]->x - T[0]->x) * (T[2]->y - T[0]->y) - (T[1]->y - T[0]->y) * (T[2]->x - T[0]->x));
+		lambda[0] = abs((T[1]->x - P->x) * (T[2]->y - P->y) - (T[1]->y - P->y) * (T[2]->x - P->x));
+		lambda[0] /= divider;
+
+		lambda[1] = abs((T[0]->x - P->x) * (T[2]->y - P->y) - (T[0]->y - P->y) * (T[2]->x - P->x));
+		lambda[1] /= divider;
+
+		lambda[2] = 1 - lambda[0] - lambda[1];
+
+		return T[0]->z * lambda[0] + T[1]->z * lambda[1] + T[2]->z * lambda[2];
+		};
+
+	QVector<Edge> edges;
+	Vertex start = *vertices.last();
+
+	for (int i = 0; i < vertices.length(); i++) {
+		Vertex end = *vertices[i];
+		if (start.y > end.y) {
+			std::swap(start, end);
+		}
+		if (start.y != end.y) {
+			Edge edge;
+			edge.start = start;
+			edge.end = end;
+			edge.m = static_cast<double>(end.y - start.y) / (end.x - start.x);
+			edges.append(edge);
+		}
+		start = *vertices[i];
+	}
+	if (edges.length() != 2) {
+		return;
+	}
+	if (edges[0].end.x != edges[1].end.x) {
+		std::sort(edges.begin(), edges.end(), [](Edge edge1, Edge edge2) {
+			return edge1.end.x < edge2.end.x;
+			});
+	}
+	int ymin = edges[0].start.y;
+	int ymax = edges[0].end.y;
+	double x1 = edges[0].start.x;
+	double x2 = edges[1].start.x;
+	for (int y = ymin; y < ymax; y++) {
+		if (x1 != x2) {
+			for (int x = static_cast<int>(x1); x <= static_cast<int>(x2); x++) {
+				if (isInside(x, y)) {
+					double z = interpolation(vertices, new Vertex(x, y, 0));
+					if (mapOfZCoords.contains(QPair<int, int>(x, y))) {
+						if (z > mapOfZCoords.value(QPair<int, int>(x, y))) {
+							mapOfColors.insert(QPair<int, int>(x, y), color);
+							mapOfZCoords.insert(QPair<int, int>(x, y), z);
+							setPixel(x, y, color);
+						}
+						else {
+							setPixel(x, y, mapOfColors.value(QPair<int, int>(x, y)));
+						}
+					}
+					else {
+						mapOfZCoords.insert(QPair<int, int>(x, y), z);
+						mapOfColors.insert(QPair<int, int>(x, y), color);
+						setPixel(x, y, color);
+					}
+				}
+			}
+		}
+		x1 += 1 / edges[0].m;
+		x2 += 1 / edges[1].m;
+	}
+	update();
+}
+
 //Crop functions
 QVector<QPoint> ViewerWidget::cyrusBeck(QPoint P1, QPoint P2) {
 	if (P1.x() < 0 && P2.x() < 0 || P1.x() > img->width() && P2.x() > img->width() ||
@@ -953,9 +1073,14 @@ void createCubeVTK(QVector<Vertex> vertices, QString filename) {
 Object_H_edge loadPolygonsVTK(QString filename) {
 	QVector<Vertex*> vertices;
 	QVector<Face*> faces;
+	QMap<Face*, QColor> colors;
 	QHash <QPair<int, int>, H_edge*> edgeMap;
 	QHash <Vertex*, int> vertexIndexMap;
 	QVector<H_edge*> edges;
+	// Inicialization of random generator for generating colors of faces
+	std::random_device rd;
+	std::mt19937 gen(rd());
+	std::uniform_int_distribution<int> dis(0, 255);
 
 	QFile file(filename + ".vtk");
 	if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
@@ -1009,6 +1134,8 @@ Object_H_edge loadPolygonsVTK(QString filename) {
 			}
 			Face* currentFace = new Face(edgesInPolygon[0]);
 			faces.append(currentFace);
+			QColor currentColor(dis(gen), dis(gen), dis(gen), 255);
+			colors.insert(currentFace, currentColor);
 			for (int j = 0; j < edgesInPolygonCount; j++) {
 				if (j != edgesInPolygonCount - 1) {
 					edgesInPolygon[j]->edge_next = edgesInPolygon[j + 1];
@@ -1038,7 +1165,9 @@ Object_H_edge loadPolygonsVTK(QString filename) {
 		}
 		qDebug() << filename << " : file has been loaded";
 		file.close();
-		return Object_H_edge(vertices, edges, faces);
+		Object_H_edge object(vertices, edges, faces);
+		object.colors = colors;
+		return object;
 	}
 	else {
 		qDebug() << filename << " : file failed to open";

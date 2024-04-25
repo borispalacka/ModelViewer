@@ -8,6 +8,7 @@
 #include <QString>
 #include <iostream>
 #include <cmath>
+#include <QMap>
 
 //-------------Need to place this in different header---------
 
@@ -25,6 +26,7 @@ public:
 		return "Vertex({" + QString::number(x) + ", " + QString::number(y) + ", " + QString::number(z) + "})";
 	}
 	QPoint toQPointXY() { return QPoint(static_cast<int> (x), static_cast<int> (y)); }
+
 	bool operator==(const Vertex& ver) const {
 		return x == ver.x && y == ver.y && z == ver.z;
 	}
@@ -36,6 +38,10 @@ public:
 	}
 	Vertex operator-(const Vertex& ver) const {
 		return Vertex(ver.x - x, ver.y - y, ver.z - z);
+	}
+	friend QDebug operator<<(QDebug dbg, const Vertex& vertex) {
+		dbg.nospace() << "Vertex(" << vertex.x << ", " << vertex.y << ", " << vertex.z << " )";
+		return dbg.space();
 	}
 };
 
@@ -83,6 +89,7 @@ public:
 	QVector<Vertex*> vertices;
 	QVector<H_edge*> edges;
 	QVector<Face*> faces;
+	QMap<Face*, QColor> colors;
 
 	Object_H_edge() {};
 	Object_H_edge(QVector<Vertex*> vert, QVector<H_edge*> edg, QVector<Face*> fcs) : vertices(vert), edges(edg), faces(fcs) {};
@@ -153,6 +160,8 @@ private:
 
 	Camera camera = Camera(Vertex(0,0,0));
 	ProjectionPlane projectionPlane = ProjectionPlane(0,0,Vertex(0,0,0));
+
+	//Hash tables for Z-buffer algorithm
 	QHash<QPair<int, int>, QColor> mapOfColors;
 	QHash<QPair<int, int>, double> mapOfZCoords;
 
@@ -248,7 +257,13 @@ public:
 	//3D draw functions
 	void drawObject(const Object_H_edge& object, Camera camera, ProjectionPlane projectionPlane, int projectionType, int representationType);
 	QVector<Vertex> perspectiveCoordSystemTransformation(const Object_H_edge& object, int projectionType);
+	double baricentricInterpolation(const QVector<Vertex*> vertices, Vertex* currentVertex);
+	void fillObjectPolygonSetup(const QVector<Vertex*> vertices,QColor color, int fillingAlg);
+	void fillObjectPolygon(const QVector<Vertex*> vertices, QColor color, int fillingAlg);
 	QVector<QColor> zBuffer(const Object_H_edge& object);
+
+
+
 	QVector <QPoint> cyrusBeck(QPoint P1, QPoint P2);
 	QVector <QPoint> sutherlandHodgman(QVector<QPoint> V);
 
