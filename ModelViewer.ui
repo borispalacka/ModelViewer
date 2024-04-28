@@ -7,32 +7,36 @@
     <x>0</x>
     <y>0</y>
     <width>1243</width>
-    <height>902</height>
+    <height>966</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>ModelViewer</string>
   </property>
   <widget class="QWidget" name="centralWidget">
-   <layout class="QVBoxLayout" name="verticalLayout_3">
-    <item>
-     <widget class="QScrollArea" name="scrollArea">
-      <property name="widgetResizable">
-       <bool>true</bool>
-      </property>
-      <widget class="QWidget" name="scrollAreaWidgetContents">
-       <property name="geometry">
-        <rect>
-         <x>0</x>
-         <y>0</y>
-         <width>980</width>
-         <height>827</height>
-        </rect>
-       </property>
-      </widget>
-     </widget>
-    </item>
-   </layout>
+   <widget class="QScrollArea" name="scrollArea">
+    <property name="geometry">
+     <rect>
+      <x>60</x>
+      <y>50</y>
+      <width>700</width>
+      <height>700</height>
+     </rect>
+    </property>
+    <property name="widgetResizable">
+     <bool>true</bool>
+    </property>
+    <widget class="QWidget" name="scrollAreaWidgetContents">
+     <property name="geometry">
+      <rect>
+       <x>0</x>
+       <y>0</y>
+       <width>698</width>
+       <height>698</height>
+      </rect>
+     </property>
+    </widget>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">
@@ -100,198 +104,113 @@
           </property>
          </widget>
         </item>
-       </layout>
-      </widget>
-     </item>
-     <item>
-      <widget class="QGroupBox" name="groupBox_2">
-       <property name="title">
-        <string>Draw</string>
-       </property>
-       <property name="checkable">
-        <bool>false</bool>
-       </property>
-       <layout class="QFormLayout" name="formLayout">
-        <item row="1" column="0">
-         <widget class="QToolButton" name="toolButtonDrawLine">
-          <property name="text">
-           <string>Line</string>
+        <item>
+         <widget class="QGroupBox" name="groupBox_2">
+          <property name="title">
+           <string>Draw</string>
           </property>
           <property name="checkable">
-           <bool>true</bool>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="1">
-         <widget class="QComboBox" name="comboBoxLineAlg">
-          <item>
-           <property name="text">
-            <string>DDA</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>Bresenham</string>
-           </property>
-          </item>
-         </widget>
-        </item>
-        <item row="2" column="0">
-         <widget class="QToolButton" name="toolButtonDrawCircle">
-          <property name="text">
-           <string>Circle</string>
-          </property>
-          <property name="checkable">
-           <bool>true</bool>
-          </property>
-         </widget>
-        </item>
-        <item row="3" column="0">
-         <widget class="QToolButton" name="toolButtonDrawPolygon">
-          <property name="text">
-           <string>Polygon</string>
-          </property>
-          <property name="checkable">
-           <bool>true</bool>
-          </property>
-         </widget>
-        </item>
-        <item row="3" column="1">
-         <widget class="QComboBox" name="comboBoxFillingAlg">
-          <item>
-           <property name="text">
-            <string>None</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>Solid</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>Nearest Neighbour</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>Barycentric</string>
-           </property>
-          </item>
-         </widget>
-        </item>
-        <item row="4" column="0">
-         <widget class="QToolButton" name="toolButtonDrawCurve">
-          <property name="text">
-           <string>curve</string>
-          </property>
-          <property name="checkable">
-           <bool>true</bool>
-          </property>
-         </widget>
-        </item>
-        <item row="4" column="1">
-         <widget class="QComboBox" name="comboBoxCurveAlg">
-          <item>
-           <property name="text">
-            <string>Hermitian</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>Bezier</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>Coons Cubic B-Spline</string>
-           </property>
-          </item>
-         </widget>
-        </item>
-       </layout>
-      </widget>
-     </item>
-     <item>
-      <widget class="QGroupBox" name="groupBox_4">
-       <property name="title">
-        <string>VTK file</string>
-       </property>
-       <layout class="QFormLayout" name="formLayout_2">
-        <item row="6" column="0">
-         <widget class="QPushButton" name="pushButtonCreateVTK">
-          <property name="text">
-           <string>create</string>
-          </property>
-         </widget>
-        </item>
-        <item row="3" column="0">
-         <widget class="QLabel" name="label">
-          <property name="text">
-           <string>Edge length:</string>
-          </property>
-         </widget>
-        </item>
-        <item row="3" column="1">
-         <widget class="QSpinBox" name="spinBoxEdgeLength">
-          <property name="maximum">
-           <number>1000</number>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="1">
-         <widget class="QComboBox" name="comboBoxTypeCreateVTK">
-          <item>
-           <property name="text">
-            <string>Cube</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>Sphere</string>
-           </property>
-          </item>
-         </widget>
-        </item>
-        <item row="1" column="0">
-         <widget class="QLabel" name="label_2">
-          <property name="text">
-           <string>Create VTK</string>
-          </property>
-         </widget>
-        </item>
-        <item row="4" column="0">
-         <widget class="QLabel" name="label_3">
-          <property name="text">
-           <string>long/lat count:</string>
-          </property>
-         </widget>
-        </item>
-        <item row="4" column="1">
-         <widget class="QSpinBox" name="spinBoxLongLatCount">
-          <property name="enabled">
            <bool>false</bool>
           </property>
-          <property name="maximum">
-           <number>1000</number>
-          </property>
-         </widget>
-        </item>
-        <item row="5" column="0">
-         <widget class="QLabel" name="label_4">
-          <property name="text">
-           <string>Radius</string>
-          </property>
-         </widget>
-        </item>
-        <item row="5" column="1">
-         <widget class="QDoubleSpinBox" name="doubleSpinBoxSphereRadius">
-          <property name="enabled">
-           <bool>false</bool>
-          </property>
-          <property name="maximum">
-           <double>1000.000000000000000</double>
-          </property>
+          <layout class="QFormLayout" name="formLayout">
+           <item row="1" column="0">
+            <widget class="QToolButton" name="toolButtonDrawLine">
+             <property name="text">
+              <string>Line</string>
+             </property>
+             <property name="checkable">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="1">
+            <widget class="QComboBox" name="comboBoxLineAlg">
+             <item>
+              <property name="text">
+               <string>DDA</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Bresenham</string>
+              </property>
+             </item>
+            </widget>
+           </item>
+           <item row="2" column="0">
+            <widget class="QToolButton" name="toolButtonDrawCircle">
+             <property name="text">
+              <string>Circle</string>
+             </property>
+             <property name="checkable">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="0">
+            <widget class="QToolButton" name="toolButtonDrawPolygon">
+             <property name="text">
+              <string>Polygon</string>
+             </property>
+             <property name="checkable">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="1">
+            <widget class="QComboBox" name="comboBoxFillingAlg">
+             <item>
+              <property name="text">
+               <string>None</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Solid</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Nearest Neighbour</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Barycentric</string>
+              </property>
+             </item>
+            </widget>
+           </item>
+           <item row="4" column="0">
+            <widget class="QToolButton" name="toolButtonDrawCurve">
+             <property name="text">
+              <string>curve</string>
+             </property>
+             <property name="checkable">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item row="4" column="1">
+            <widget class="QComboBox" name="comboBoxCurveAlg">
+             <item>
+              <property name="text">
+               <string>Hermitian</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Bezier</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Coons Cubic B-Spline</string>
+              </property>
+             </item>
+            </widget>
+           </item>
+          </layout>
          </widget>
         </item>
        </layout>
@@ -421,69 +340,56 @@
       </widget>
      </item>
      <item>
+      <spacer name="verticalSpacer">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>20</width>
+         <height>40</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <spacer name="verticalSpacer_2">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>20</width>
+         <height>40</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+    </layout>
+   </widget>
+  </widget>
+  <widget class="QDockWidget" name="dockWidget_4">
+   <property name="floating">
+    <bool>false</bool>
+   </property>
+   <property name="windowTitle">
+    <string>tools</string>
+   </property>
+   <attribute name="dockWidgetArea">
+    <number>1</number>
+   </attribute>
+   <widget class="QWidget" name="dockWidgetContents_4">
+    <layout class="QGridLayout" name="gridLayout_3">
+     <item row="1" column="0">
       <widget class="QGroupBox" name="groupBox_5">
        <property name="title">
         <string>Edit Camera/Projection</string>
        </property>
-       <layout class="QGridLayout" name="gridLayout_2">
-        <item row="1" column="1">
-         <widget class="QSlider" name="horizontalSliderAzimut">
-          <property name="maximum">
-           <number>360</number>
-          </property>
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-         </widget>
-        </item>
-        <item row="2" column="1">
-         <widget class="QComboBox" name="comboBoxProjectionType">
-          <item>
-           <property name="text">
-            <string>Orthogonal</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>Perspective</string>
-           </property>
-          </item>
-         </widget>
-        </item>
-        <item row="2" column="0">
-         <widget class="QLabel" name="label_7">
-          <property name="text">
-           <string>Projection:</string>
-          </property>
-         </widget>
-        </item>
-        <item row="4" column="0">
-         <widget class="QLabel" name="label_8">
-          <property name="text">
-           <string>Camera Z:</string>
-          </property>
-         </widget>
-        </item>
+       <layout class="QFormLayout" name="formLayout_3">
         <item row="0" column="0">
          <widget class="QLabel" name="label_5">
           <property name="text">
            <string>Zenit :</string>
-          </property>
-         </widget>
-        </item>
-        <item row="4" column="1">
-         <widget class="QSlider" name="horizontalSliderCameraCoordZ">
-          <property name="enabled">
-           <bool>false</bool>
-          </property>
-          <property name="minimum">
-           <number>250</number>
-          </property>
-          <property name="maximum">
-           <number>2000</number>
-          </property>
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
           </property>
          </widget>
         </item>
@@ -507,6 +413,37 @@
           </property>
          </widget>
         </item>
+        <item row="1" column="1">
+         <widget class="QSlider" name="horizontalSliderAzimut">
+          <property name="maximum">
+           <number>360</number>
+          </property>
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="0">
+         <widget class="QLabel" name="label_7">
+          <property name="text">
+           <string>Projection:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="1">
+         <widget class="QComboBox" name="comboBoxProjectionType">
+          <item>
+           <property name="text">
+            <string>Orthogonal</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Perspective</string>
+           </property>
+          </item>
+         </widget>
+        </item>
         <item row="3" column="0">
          <widget class="QLabel" name="label_9">
           <property name="text">
@@ -528,11 +465,34 @@
           </item>
          </widget>
         </item>
+        <item row="4" column="0">
+         <widget class="QLabel" name="label_8">
+          <property name="text">
+           <string>Camera Z:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="4" column="1">
+         <widget class="QSlider" name="horizontalSliderCameraCoordZ">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="minimum">
+           <number>1000</number>
+          </property>
+          <property name="maximum">
+           <number>2000</number>
+          </property>
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+         </widget>
+        </item>
        </layout>
       </widget>
      </item>
-     <item>
-      <spacer name="verticalSpacer">
+     <item row="4" column="0">
+      <spacer name="verticalSpacer_4">
        <property name="orientation">
         <enum>Qt::Vertical</enum>
        </property>
@@ -543,6 +503,104 @@
         </size>
        </property>
       </spacer>
+     </item>
+     <item row="3" column="0">
+      <spacer name="verticalSpacer_3">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>20</width>
+         <height>40</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item row="0" column="0">
+      <widget class="QGroupBox" name="groupBox_4">
+       <property name="title">
+        <string>VTK file</string>
+       </property>
+       <layout class="QFormLayout" name="formLayout_2">
+        <item row="6" column="0">
+         <widget class="QPushButton" name="pushButtonCreateVTK">
+          <property name="text">
+           <string>create</string>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="0">
+         <widget class="QLabel" name="label">
+          <property name="text">
+           <string>Edge length:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="1">
+         <widget class="QSpinBox" name="spinBoxEdgeLength">
+          <property name="maximum">
+           <number>1000</number>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1">
+         <widget class="QComboBox" name="comboBoxTypeCreateVTK">
+          <item>
+           <property name="text">
+            <string>Cube</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Sphere</string>
+           </property>
+          </item>
+         </widget>
+        </item>
+        <item row="1" column="0">
+         <widget class="QLabel" name="label_2">
+          <property name="text">
+           <string>Create VTK</string>
+          </property>
+         </widget>
+        </item>
+        <item row="4" column="0">
+         <widget class="QLabel" name="label_3">
+          <property name="text">
+           <string>long/lat count:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="4" column="1">
+         <widget class="QSpinBox" name="spinBoxLongLatCount">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="maximum">
+           <number>1000</number>
+          </property>
+         </widget>
+        </item>
+        <item row="5" column="0">
+         <widget class="QLabel" name="label_4">
+          <property name="text">
+           <string>Radius</string>
+          </property>
+         </widget>
+        </item>
+        <item row="5" column="1">
+         <widget class="QDoubleSpinBox" name="doubleSpinBoxSphereRadius">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="maximum">
+           <double>1000.000000000000000</double>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
      </item>
     </layout>
    </widget>

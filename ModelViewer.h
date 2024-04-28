@@ -20,6 +20,8 @@ private:
 	QSettings settings;
 	QMessageBox msgBox;	
 
+	bool isIn3dMode = false;
+
 	//Event filters
 	bool eventFilter(QObject* obj, QEvent* event);
 
@@ -81,4 +83,7 @@ private slots:
 	void on_horizontalSliderAzimut_valueChanged(int value);
 	void on_comboBoxProjectionType_currentIndexChanged(int index);
 	void on_horizontalSliderCameraCoordZ_valueChanged(int value);
+	void on_comboBoxRepresentationType_currentIndexChanged(int index);
+	void on_action2D_triggered();
+	void on_action3D_triggered();
 };

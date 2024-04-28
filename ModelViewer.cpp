@@ -1,5 +1,6 @@
 #include "ModelViewer.h"
 #include <cmath>
+#include <QDockWidget>
 
 ModelViewer::ModelViewer(QWidget* parent)
 	: QMainWindow(parent), ui(new Ui::ModelViewerClass)
@@ -19,13 +20,7 @@ ModelViewer::ModelViewer(QWidget* parent)
 	QString style_sheet = QString("background-color: #%1;").arg(globalColor.rgba(), 0, 16);
 	ui->pushButtonSetColor->setStyleSheet(style_sheet);
 
-	//createUvSphereVTK(300, 50, 50, "sphere");
-	createCubeVTK(300, "cube");
-	vW->setCurrentObject(loadPolygonsVTK("cube"));
-	vW->setDrawObjectActivated(true);
-	if (vW->getDrawObjectActivated()) {
-		vW->drawObject(vW->getCurrentObject(), vW->getCamera(), vW->getProjectionPlane(), ui->comboBoxProjectionType->currentIndex(), ui->comboBoxRepresentationType->currentIndex());
-	}
+	ui->dockWidget_4->setHidden(true);
 }
 
 // Event filters
@@ -591,17 +586,35 @@ void ModelViewer::on_toolButtonSymmetry_clicked() {
 }
 
 void ModelViewer::on_actionOpen_triggered()
-{
+{	
 	QString folder = settings.value("folder_img_load_path", "").toString();
-
-	QString fileFilter = "Image data (*.bmp *.gif *.jpg *.jpeg *.png *.pbm *.pgm *.ppm .*xbm .* xpm);;All files (*)";
+	QString fileFilter;
+	if (isIn3dMode) {
+		fileFilter = "VTK data (*.vtk);;All files (*)";
+	}
+	else {
+		fileFilter = "Image data (*.bmp *.gif *.jpg *.jpeg *.png *.pbm *.pgm *.ppm .*xbm .* xpm);;All files (*)";
+	}
 	QString fileName = QFileDialog::getOpenFileName(this, "Load image", folder, fileFilter);
 	if (fileName.isEmpty()) { return; }
 
 	QFileInfo fi(fileName);
 	settings.setValue("folder_img_load_path", fi.absoluteDir().absolutePath());
-
-	if (!openImage(fileName)) {
+	if (isIn3dMode) {
+		Object_H_edge object = loadPolygonsVTK(fileName);
+		if (object == Object_H_edge()) {
+			msgBox.setText("Unable to open object.");
+			msgBox.setIcon(QMessageBox::Warning);
+			msgBox.exec();
+		}
+		else {
+			vW->setCurrentObject(object);
+			on_action3D_triggered();
+			vW->setDrawObjectActivated(true);
+			vW->drawObject(vW->getCurrentObject(), vW->getCamera(), vW->getProjectionPlane(), ui->comboBoxProjectionType->currentIndex(), ui->comboBoxRepresentationType->currentIndex());
+		}
+	}
+	else if (!openImage(fileName)) {
 		msgBox.setText("Unable to open image.");
 		msgBox.setIcon(QMessageBox::Warning);
 		msgBox.exec();
@@ -667,7 +680,18 @@ void ModelViewer::on_pushButtonSetColor_clicked()
 		globalColor = newColor;
 	}
 }
-
+void ModelViewer::on_action2D_triggered() {
+	ui->dockWidget_4->setHidden(true);
+	ui->dockWidget->setHidden(false);
+	isIn3dMode = false;
+	vW->clear();
+}
+void ModelViewer::on_action3D_triggered() {
+	ui->dockWidget_4->setHidden(false);
+	ui->dockWidget->setHidden(true);
+	isIn3dMode = true;
+	vW->clear();
+}
 
 //3D slots
 void ModelViewer::on_comboBoxTypeCreateVTK_currentIndexChanged(int index) {
@@ -724,3 +748,11 @@ void ModelViewer::on_horizontalSliderCameraCoordZ_valueChanged(int value) {
 		vW->drawObject(vW->getCurrentObject(), vW->getCamera(), vW->getProjectionPlane(), ui->comboBoxProjectionType->currentIndex(), ui->comboBoxRepresentationType->currentIndex());
 	}
 }
+
+void ModelViewer::on_comboBoxRepresentationType_currentIndexChanged(int index) {
+	if (vW->getDrawObjectActivated()) {
+		vW->clear();
+		vW->drawObject(vW->getCurrentObject(), vW->getCamera(), vW->getProjectionPlane(), ui->comboBoxProjectionType->currentIndex(), ui->comboBoxRepresentationType->currentIndex());
+	}
+}
+

@@ -94,6 +94,13 @@ public:
 	Object_H_edge() {};
 	Object_H_edge(QVector<Vertex*> vert, QVector<H_edge*> edg, QVector<Face*> fcs) : vertices(vert), edges(edg), faces(fcs) {};
 
+	bool operator==(const Object_H_edge& obj) {
+		return vertices == obj.vertices && edges == obj.edges && faces == obj.faces && colors == obj.colors;
+	}
+	bool operator!=(const Object_H_edge& obj) {
+		return vertices != obj.vertices || edges != obj.edges || faces != obj.faces || colors != obj.colors;
+	}
+
 };
 
 void createCubeVTK(double d, QString filename);
@@ -164,6 +171,9 @@ private:
 	//Hash tables for Z-buffer algorithm
 	QHash<QPair<int, int>, QColor> mapOfColors;
 	QHash<QPair<int, int>, double> mapOfZCoords;
+
+	QVector<QVector<QColor>> arrayOfColors;
+	QVector<QVector<double>> arrayOfZCoords;
 
 	bool drawLineActivated = false;
 	QPoint drawLineBegin = QPoint(0, 0);

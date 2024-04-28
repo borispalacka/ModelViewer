@@ -688,9 +688,11 @@ void ViewerWidget::drawCurveCoons(QVector<QPoint> points, QColor color) {
 }
 //3D draw functions
 void ViewerWidget::drawObject(const Object_H_edge& object, Camera camera, ProjectionPlane projectionPlane, int projectionType, int representationType) {
+	timer.start();
 	//Storing old Vertices in vector , transforming object to projection coordinates
 	QVector<Vertex> oldVertices = perspectiveCoordSystemTransformation(object,projectionType );
-
+	qint64 elapsed = timer.elapsed();
+	qDebug() << "transforming elapsed time : " << elapsed;
 	//Wireframe-Model
 	if (representationType == 0) {
 		//hash table to store already drawed lines
@@ -709,7 +711,10 @@ void ViewerWidget::drawObject(const Object_H_edge& object, Camera camera, Projec
 	}
 	//Surface-Representation
 	else if (representationType == 1) {
+		arrayOfColors = QVector<QVector<QColor>>(img->height(), QVector<QColor>(img->width(), Qt::white));
+		arrayOfZCoords = QVector<QVector<double>>(img->height(), QVector<double>(img->width(), DBL_MIN));
 		for (Face* face : object.faces) {
+			timer.start();
 			QVector<Vertex*> polygonVertices;
 			H_edge edge = *face->edge;
 			polygonVertices.append(edge.vert_origin);
@@ -718,6 +723,8 @@ void ViewerWidget::drawObject(const Object_H_edge& object, Camera camera, Projec
 				polygonVertices.append(edge.vert_origin);
 			}
 			fillObjectPolygonSetup(polygonVertices, object.colors.value(face), 1);
+			elapsed = timer.elapsed();
+			qDebug() << "Drawed face elapsed time : " << elapsed;
 		}
 	}
 
@@ -762,9 +769,7 @@ QVector<Vertex> ViewerWidget::perspectiveCoordSystemTransformation(const Object_
 	}
 	return oldVertices;
 }
-double ViewerWidget::baricentricInterpolation(const QVector<Vertex*> vertices, Vertex* currentVertex) {
-	QVector<Vertex*> T = vertices;
-	Vertex* P = currentVertex;
+double ViewerWidget::baricentricInterpolation(const QVector<Vertex*> T, Vertex* P) {
 	double lambda[3];
 	lambda[0] = abs((T[1]->x - P->x) * (T[2]->y - P->y) - (T[1]->y - P->y) * (T[2]->x - P->x));
 	lambda[0] /= abs(static_cast<double>(T[1]->x - T[0]->x) * (T[2]->y - T[0]->y) - (T[1]->y - T[0]->y) * (T[2]->x - T[0]->x));
@@ -842,10 +847,8 @@ void ViewerWidget::fillObjectPolygon(const QVector<Vertex*> vertices, QColor col
 	if (edges.length() != 2) {
 		return;
 	}
-	if (edges[0].end.x != edges[1].end.x) {
-		std::sort(edges.begin(), edges.end(), [](Edge edge1, Edge edge2) {
-			return edge1.end.x < edge2.end.x;
-			});
+	if (edges[0].end.x > edges[1].end.x) {
+		std::swap(edges[0], edges[1]);
 	}
 	int ymin = edges[0].start.y;
 	int ymax = edges[0].end.y;
@@ -856,21 +859,18 @@ void ViewerWidget::fillObjectPolygon(const QVector<Vertex*> vertices, QColor col
 			for (int x = static_cast<int>(x1); x <= static_cast<int>(x2); x++) {
 				if (isInside(x, y)) {
 					double z = interpolation(vertices, new Vertex(x, y, 0));
-					if (mapOfZCoords.contains(QPair<int, int>(x, y))) {
-						if (z > mapOfZCoords.value(QPair<int, int>(x, y))) {
-							mapOfColors.remove(QPair<int, int>(x, y));
-							mapOfColors.insert(QPair<int, int>(x, y), color);
-							mapOfZCoords.remove(QPair<int, int>(x, y));
-							mapOfZCoords.insert(QPair<int, int>(x, y), z);
+					if (mapOfZCoords.contains({ x, y })) {
+						if (z > mapOfZCoords.value({ x, y })) {
+							mapOfColors.remove({ x, y });
+							mapOfColors.insert({ x, y }, color);
+							mapOfZCoords.remove({ x, y });
+							mapOfZCoords.insert({ x, y }, z);
 							setPixel(x, y, color);
-						}
-						else {
-							setPixel(x, y, mapOfColors.value(QPair<int, int>(x, y)));
 						}
 					}
 					else {
-						mapOfZCoords.insert(QPair<int, int>(x, y), z);
-						mapOfColors.insert(QPair<int, int>(x, y), color);
+						mapOfZCoords.insert({ x, y }, z);
+						mapOfColors.insert({ x, y }, color);
 						setPixel(x, y, color);
 					}
 				}
@@ -1075,7 +1075,7 @@ Object_H_edge loadPolygonsVTK(QString filename) {
 	std::mt19937 gen(rd());
 	std::uniform_int_distribution<int> dis(0, 255);
 
-	QFile file(filename + ".vtk");
+	QFile file(filename);
 	if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
 		QString fileHeader = "";
 		QTextStream input(&file);
