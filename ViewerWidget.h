@@ -89,7 +89,7 @@ public:
 	QVector<Vertex*> vertices;
 	QVector<H_edge*> edges;
 	QVector<Face*> faces;
-	QMap<Face*, QColor> colors;
+	QHash<Face*, QColor> colors;
 
 	Object_H_edge() {};
 	Object_H_edge(QVector<Vertex*> vert, QVector<H_edge*> edg, QVector<Face*> fcs) : vertices(vert), edges(edg), faces(fcs) {};
@@ -260,7 +260,6 @@ public:
 	double baricentricInterpolation(const QVector<Vertex*> vertices, Vertex* currentVertex);
 	void fillObjectPolygonSetup(const QVector<Vertex*> vertices,QColor color, int fillingAlg);
 	void fillObjectPolygon(const QVector<Vertex*> vertices, QColor color, int fillingAlg);
-	QVector<QColor> zBuffer(const Object_H_edge& object);
 
 
 

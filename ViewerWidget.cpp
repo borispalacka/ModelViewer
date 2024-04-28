@@ -730,9 +730,6 @@ void ViewerWidget::drawObject(const Object_H_edge& object, Camera camera, Projec
 	mapOfColors.clear();
 	mapOfZCoords.clear();
 }
-QVector<QColor> ViewerWidget::zBuffer(const Object_H_edge& object) {
-	return QVector<QColor>();
-}
 QVector<Vertex> ViewerWidget::perspectiveCoordSystemTransformation(const Object_H_edge& object, int projectionType) {
 	QVector<Vertex> oldVertices;
 	//Defining translation to center where better time complexity
@@ -756,11 +753,10 @@ QVector<Vertex> ViewerWidget::perspectiveCoordSystemTransformation(const Object_
 		for (Vertex* vertex : object.vertices) {
 			Vertex newVertex(0, 0, 0);
 			oldVertices.append(*vertex);
-			qDebug() << camera.position.z;
 			//calculating new projection coordinates
 			newVertex.x = camera.position.z * vertex->x / (camera.position.z - vertex->z);
 			newVertex.y = camera.position.z * vertex->y / (camera.position.z - vertex->z);
-			newVertex.z = 0;
+			newVertex.z = vertex->z;
 			*vertex = Vertex(correctionX, correctionY, 0) + newVertex;
 		}
 	}
@@ -816,16 +812,11 @@ void ViewerWidget::fillObjectPolygon(const QVector<Vertex*> vertices, QColor col
 		double m = 0;
 	};
 
-
-	auto interpolation = [](QVector<Vertex*> T, Vertex* P)->double {
+	auto interpolation = [](QVector<Vertex*> T, const Vertex* P)->double {
 		double lambda[3];
 		double divider = abs(static_cast<double>(T[1]->x - T[0]->x) * (T[2]->y - T[0]->y) - (T[1]->y - T[0]->y) * (T[2]->x - T[0]->x));
-		lambda[0] = abs((T[1]->x - P->x) * (T[2]->y - P->y) - (T[1]->y - P->y) * (T[2]->x - P->x));
-		lambda[0] /= divider;
-
-		lambda[1] = abs((T[0]->x - P->x) * (T[2]->y - P->y) - (T[0]->y - P->y) * (T[2]->x - P->x));
-		lambda[1] /= divider;
-
+		lambda[0] = abs((T[1]->x - P->x) * (T[2]->y - P->y) - (T[1]->y - P->y) * (T[2]->x - P->x)) / divider;
+		lambda[1] = abs((T[0]->x - P->x) * (T[2]->y - P->y) - (T[0]->y - P->y) * (T[2]->x - P->x)) / divider;
 		lambda[2] = 1 - lambda[0] - lambda[1];
 
 		return T[0]->z * lambda[0] + T[1]->z * lambda[1] + T[2]->z * lambda[2];
@@ -867,7 +858,9 @@ void ViewerWidget::fillObjectPolygon(const QVector<Vertex*> vertices, QColor col
 					double z = interpolation(vertices, new Vertex(x, y, 0));
 					if (mapOfZCoords.contains(QPair<int, int>(x, y))) {
 						if (z > mapOfZCoords.value(QPair<int, int>(x, y))) {
+							mapOfColors.remove(QPair<int, int>(x, y));
 							mapOfColors.insert(QPair<int, int>(x, y), color);
+							mapOfZCoords.remove(QPair<int, int>(x, y));
 							mapOfZCoords.insert(QPair<int, int>(x, y), z);
 							setPixel(x, y, color);
 						}
@@ -1073,7 +1066,7 @@ void createCubeVTK(QVector<Vertex> vertices, QString filename) {
 Object_H_edge loadPolygonsVTK(QString filename) {
 	QVector<Vertex*> vertices;
 	QVector<Face*> faces;
-	QMap<Face*, QColor> colors;
+	QHash<Face*, QColor> colors;
 	QHash <QPair<int, int>, H_edge*> edgeMap;
 	QHash <Vertex*, int> vertexIndexMap;
 	QVector<H_edge*> edges;
