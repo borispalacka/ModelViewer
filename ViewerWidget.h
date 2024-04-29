@@ -169,8 +169,6 @@ private:
 	ProjectionPlane projectionPlane = ProjectionPlane(0,0,Vertex(0,0,0));
 
 	//Hash tables for Z-buffer algorithm
-	QHash<QPair<int, int>, QColor> mapOfColors;
-	QHash<QPair<int, int>, double> mapOfZCoords;
 
 	QVector<QVector<QColor>> arrayOfColors;
 	QVector<QVector<double>> arrayOfZCoords;

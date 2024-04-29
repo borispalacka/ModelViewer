@@ -688,11 +688,8 @@ void ViewerWidget::drawCurveCoons(QVector<QPoint> points, QColor color) {
 }
 //3D draw functions
 void ViewerWidget::drawObject(const Object_H_edge& object, Camera camera, ProjectionPlane projectionPlane, int projectionType, int representationType) {
-	timer.start();
 	//Storing old Vertices in vector , transforming object to projection coordinates
 	QVector<Vertex> oldVertices = perspectiveCoordSystemTransformation(object,projectionType );
-	qint64 elapsed = timer.elapsed();
-	qDebug() << "transforming elapsed time : " << elapsed;
 	//Wireframe-Model
 	if (representationType == 0) {
 		//hash table to store already drawed lines
@@ -711,8 +708,8 @@ void ViewerWidget::drawObject(const Object_H_edge& object, Camera camera, Projec
 	}
 	//Surface-Representation
 	else if (representationType == 1) {
-		arrayOfColors = QVector<QVector<QColor>>(img->height(), QVector<QColor>(img->width(), Qt::white));
-		arrayOfZCoords = QVector<QVector<double>>(img->height(), QVector<double>(img->width(), DBL_MIN));
+		arrayOfZCoords = QVector<QVector<double>>(img->height(), QVector<double>(img->width(), -DBL_MAX));
+		arrayOfColors = QVector<QVector<QColor>>(img->height(), QVector<QColor>(img->width(),Qt::white));
 		for (Face* face : object.faces) {
 			timer.start();
 			QVector<Vertex*> polygonVertices;
@@ -723,8 +720,6 @@ void ViewerWidget::drawObject(const Object_H_edge& object, Camera camera, Projec
 				polygonVertices.append(edge.vert_origin);
 			}
 			fillObjectPolygonSetup(polygonVertices, object.colors.value(face), 1);
-			elapsed = timer.elapsed();
-			qDebug() << "Drawed face elapsed time : " << elapsed;
 		}
 	}
 
@@ -734,8 +729,6 @@ void ViewerWidget::drawObject(const Object_H_edge& object, Camera camera, Projec
 		*object.vertices[i] = oldVertices[i];
 	}
 	update();
-	mapOfColors.clear();
-	mapOfZCoords.clear();
 }
 QVector<Vertex> ViewerWidget::perspectiveCoordSystemTransformation(const Object_H_edge& object, int projectionType) {
 	QVector<Vertex> oldVertices;
@@ -782,7 +775,9 @@ double ViewerWidget::baricentricInterpolation(const QVector<Vertex*> T, Vertex* 
 	return T[0]->z * lambda[0] + T[1]->z * lambda[1] + T[2]->z * lambda[2];
 }
 void ViewerWidget::fillObjectPolygonSetup(const QVector<Vertex*> vertices, QColor color, int fillAlgType) {
-
+	if (vertices.length() != 3) {
+		return;
+	}
 	QVector<Vertex*> T = vertices;
 	
 	//Sorting all vertices primarly with their y-coordinate and secondary with their x-coordinate
@@ -817,11 +812,11 @@ void ViewerWidget::fillObjectPolygon(const QVector<Vertex*> vertices, QColor col
 		double m = 0;
 	};
 
-	auto interpolation = [](QVector<Vertex*> T, const Vertex* P)->double {
+	auto interpolation = [](const QVector<Vertex*>& T,const Vertex& P)->double {
 		double lambda[3];
 		double divider = abs(static_cast<double>(T[1]->x - T[0]->x) * (T[2]->y - T[0]->y) - (T[1]->y - T[0]->y) * (T[2]->x - T[0]->x));
-		lambda[0] = abs((T[1]->x - P->x) * (T[2]->y - P->y) - (T[1]->y - P->y) * (T[2]->x - P->x)) / divider;
-		lambda[1] = abs((T[0]->x - P->x) * (T[2]->y - P->y) - (T[0]->y - P->y) * (T[2]->x - P->x)) / divider;
+		lambda[0] = abs((T[1]->x - P.x) * (T[2]->y - P.y) - (T[1]->y - P.y) * (T[2]->x - P.x)) / divider;
+		lambda[1] = abs((T[0]->x - P.x) * (T[2]->y - P.y) - (T[0]->y - P.y) * (T[2]->x - P.x)) / divider;
 		lambda[2] = 1 - lambda[0] - lambda[1];
 
 		return T[0]->z * lambda[0] + T[1]->z * lambda[1] + T[2]->z * lambda[2];
@@ -829,9 +824,10 @@ void ViewerWidget::fillObjectPolygon(const QVector<Vertex*> vertices, QColor col
 
 	QVector<Edge> edges;
 	Vertex start = *vertices.last();
-
+	int zmax = vertices[0]->z;
 	for (int i = 0; i < vertices.length(); i++) {
 		Vertex end = *vertices[i];
+
 		if (start.y > end.y) {
 			std::swap(start, end);
 		}
@@ -843,6 +839,9 @@ void ViewerWidget::fillObjectPolygon(const QVector<Vertex*> vertices, QColor col
 			edges.append(edge);
 		}
 		start = *vertices[i];
+		if (zmax < vertices[i]->z) {
+			zmax = vertices[i]->z;
+		}
 	}
 	if (edges.length() != 2) {
 		return;
@@ -858,19 +857,10 @@ void ViewerWidget::fillObjectPolygon(const QVector<Vertex*> vertices, QColor col
 		if (x1 != x2) {
 			for (int x = static_cast<int>(x1); x <= static_cast<int>(x2); x++) {
 				if (isInside(x, y)) {
-					double z = interpolation(vertices, new Vertex(x, y, 0));
-					if (mapOfZCoords.contains({ x, y })) {
-						if (z > mapOfZCoords.value({ x, y })) {
-							mapOfColors.remove({ x, y });
-							mapOfColors.insert({ x, y }, color);
-							mapOfZCoords.remove({ x, y });
-							mapOfZCoords.insert({ x, y }, z);
-							setPixel(x, y, color);
-						}
-					}
-					else {
-						mapOfZCoords.insert({ x, y }, z);
-						mapOfColors.insert({ x, y }, color);
+					double z = interpolation(vertices, Vertex(x, y, 0));
+					if (z > arrayOfZCoords.at(y).at(x)) {
+						arrayOfZCoords[y][x] = z;
+						arrayOfColors[y][x] = color;
 						setPixel(x, y, color);
 					}
 				}
