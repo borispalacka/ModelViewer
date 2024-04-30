@@ -21,6 +21,7 @@ ModelViewer::ModelViewer(QWidget* parent)
 	ui->pushButtonSetColor->setStyleSheet(style_sheet);
 
 	ui->dockWidget_4->setHidden(true);
+	createUvSphereVTK(0, 60, 60, "elipsoid", 1);
 }
 
 // Event filters

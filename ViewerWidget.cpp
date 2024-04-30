@@ -775,11 +775,41 @@ double ViewerWidget::baricentricInterpolation(const QVector<Vertex*> T, Vertex* 
 	return T[0]->z * lambda[0] + T[1]->z * lambda[1] + T[2]->z * lambda[2];
 }
 void ViewerWidget::fillObjectPolygonSetup(const QVector<Vertex*> vertices, QColor color, int fillAlgType) {
+	auto phongLightningModel = [&](Vertex& vertex)->QColor {
+		//temporary variables
+		//this variables will be defined on before this lamba
+		Vertex lightPos;
+		Vertex cameraPos;
+		QVector3D N = vertex.toQVector3D().normalized();
+		QVector3D L = (lightPos - vertex).toQVector3D().normalized();
+		QVector3D V = (cameraPos - vertex).toQVector3D().normalized();
+		QVector3D R = (2 * (QVector3D::dotProduct(L , N)) * N - L).normalized();
+		//-------------------
+
+		//reflexion part
+		//variables will be passed as argument in function call
+		QColor I_L; // intesity of falling ray ( color vector)
+		double r_s; // koeficient of reflection
+		double h; // sharpness of mirror reflection
+		//-------------------
+		double coef = r_s * pow(QVector3D::dotProduct(V, R), h);
+		QColor I_s = QColor(I_L.red() * coef, I_L.green() * coef, I_L.blue() * coef);
+
+		//Difusion part
+		//variables will be passed as argument in function call
+		double r_d; // koeficient of difusion
+		coef = r_d * QVector3D::dotProduct(L, N);
+		QColor I_d = QColor(I_L.red() * coef, I_L.green() * coef, I_L.blue() * coef);
+	};
+
 	if (vertices.length() != 3) {
 		return;
 	}
 	QVector<Vertex*> T = vertices;
-	
+
+	if (fillAlgType == 2) {
+
+	}
 	//Sorting all vertices primarly with their y-coordinate and secondary with their x-coordinate
 	std::sort(T.begin(), T.end(), [](const Vertex* vertex1, const Vertex* vertex2) {
 		if (vertex1->y < vertex2->y || vertex1->y == vertex2->y && vertex1->x < vertex2->x) {
@@ -1223,7 +1253,7 @@ void rotateCubeAnimation(double d, int frames) {
 	}
 }
 
-void createUvSphereVTK(double r, int longitude, int latitude, QString filename) {
+void createUvSphereVTK(double r, int longitude, int latitude, QString filename, int mode) {
 	QVector<QVector<Vertex>> vertices;
 	double thetaAngle = -M_PI/2;
 	double phiAngle = 0;
@@ -1240,9 +1270,16 @@ void createUvSphereVTK(double r, int longitude, int latitude, QString filename) 
 			QVector<Vertex> verticesOneLatitude;
 			for (int j = 0; j <= longitude; j++) {
 				Vertex vertex;
-				vertex.x = rho * cos(thetaAngle) * cos(phiAngle);
-				vertex.y = rho * cos(thetaAngle) * sin(phiAngle);
-				vertex.z = rho * sin(thetaAngle);
+				if (mode == 0) {
+					vertex.x = rho * cos(thetaAngle) * cos(phiAngle);
+					vertex.y = rho * cos(thetaAngle) * sin(phiAngle);
+					vertex.z = rho * sin(thetaAngle);
+				}
+				else if (mode == 1) {
+					vertex.x = 200 * cos(thetaAngle) * cos(phiAngle);
+					vertex.y = 100 * cos(thetaAngle) * sin(phiAngle);
+					vertex.z = 80 * sin(thetaAngle);
+				}
 				verticesOneLatitude.append(vertex);
 				phiAngle += phiAngleDivision;
 				verticesCount++;
@@ -1303,8 +1340,6 @@ void createUvSphereVTK(double r, int longitude, int latitude, QString filename) 
 			polygonCount++;
 		}
 		file.close();
-		for (int i = 0; i < vertices.length(); i++) {
-		}
 		qDebug() << "file was saved succsesfully";
 	}
 	else {

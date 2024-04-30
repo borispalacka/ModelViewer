@@ -27,6 +27,14 @@ public:
 	}
 	QPoint toQPointXY() { return QPoint(static_cast<int> (x), static_cast<int> (y)); }
 
+	QVector3D toQVector3D() { 
+		QVector3D vector;
+		vector.setX(x);
+		vector.setY(y);
+		vector.setZ(z);
+		return vector; 
+	}
+
 	bool operator==(const Vertex& ver) const {
 		return x == ver.x && y == ver.y && z == ver.z;
 	}
@@ -113,7 +121,7 @@ void createCubeVTK(QVector<Vertex> vertices, QString filename);
 
 void rotateCubeAnimation(double d, int frames);
 
-void createUvSphereVTK(double r, int longitude, int latitude, QString filename);
+void createUvSphereVTK(double r, int longitude, int latitude, QString filename, int mode);
 
 //-------------------------------------------------------------
 
