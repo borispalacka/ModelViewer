@@ -21,6 +21,8 @@ ModelViewer::ModelViewer(QWidget* parent)
 	ui->pushButtonSetColor->setStyleSheet(style_sheet);
 
 	ui->dockWidget_4->setHidden(true);
+
+	globalLightSettings = new LightSettings(Vertex(500, 500, 0), 1, 0.5, 1, 40, Qt::red, Qt::blue);
 }
 
 // Event filters
@@ -715,7 +717,7 @@ void ModelViewer::on_horizontalSliderZenit_valueChanged(int value) {
 	vW->getProjectionPlane().setProjectionPlane(vW->getProjectionPlane().azimut, radValue);
 	vW->clear();
 	if (vW->getDrawObjectActivated()) {
-		vW->drawObject(vW->getCurrentObject(), vW->getCamera(), vW->getProjectionPlane(), ui->comboBoxProjectionType->currentIndex(), ui->comboBoxRepresentationType->currentIndex(),nullptr);
+		vW->drawObject(vW->getCurrentObject(), vW->getCamera(), vW->getProjectionPlane(), ui->comboBoxProjectionType->currentIndex(), ui->comboBoxRepresentationType->currentIndex(),globalLightSettings);
 	}
 }
 void ModelViewer::on_horizontalSliderAzimut_valueChanged(int value) {
@@ -723,7 +725,7 @@ void ModelViewer::on_horizontalSliderAzimut_valueChanged(int value) {
 	vW->getProjectionPlane().setProjectionPlane(radValue, vW->getProjectionPlane().zenit);
 	vW->clear();
 	if (vW->getDrawObjectActivated()) {
-		vW->drawObject(vW->getCurrentObject(), vW->getCamera(), vW->getProjectionPlane(), ui->comboBoxProjectionType->currentIndex(), ui->comboBoxRepresentationType->currentIndex(),nullptr);
+		vW->drawObject(vW->getCurrentObject(), vW->getCamera(), vW->getProjectionPlane(), ui->comboBoxProjectionType->currentIndex(), ui->comboBoxRepresentationType->currentIndex(),globalLightSettings);
 	}
 
 }
@@ -752,7 +754,7 @@ void ModelViewer::on_horizontalSliderCameraCoordZ_valueChanged(int value) {
 void ModelViewer::on_comboBoxRepresentationType_currentIndexChanged(int index) {
 	if (vW->getDrawObjectActivated()) {
 		vW->clear();
-		vW->drawObject(vW->getCurrentObject(), vW->getCamera(), vW->getProjectionPlane(), ui->comboBoxProjectionType->currentIndex(), ui->comboBoxRepresentationType->currentIndex(), nullptr);
+		vW->drawObject(vW->getCurrentObject(), vW->getCamera(), vW->getProjectionPlane(), ui->comboBoxProjectionType->currentIndex(), ui->comboBoxRepresentationType->currentIndex(), globalLightSettings);
 	}
 }
 

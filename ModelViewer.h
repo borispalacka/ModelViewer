@@ -18,7 +18,8 @@ private:
 
 	QColor globalColor;
 	QSettings settings;
-	QMessageBox msgBox;	
+	LightSettings *globalLightSettings;
+	QMessageBox msgBox;
 
 	bool isIn3dMode = false;
 
