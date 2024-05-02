@@ -21,7 +21,6 @@ ModelViewer::ModelViewer(QWidget* parent)
 	ui->pushButtonSetColor->setStyleSheet(style_sheet);
 
 	ui->dockWidget_4->setHidden(true);
-	createUvSphereVTK(0, 60, 60, "elipsoid", 1);
 }
 
 // Event filters
@@ -612,7 +611,7 @@ void ModelViewer::on_actionOpen_triggered()
 			vW->setCurrentObject(object);
 			on_action3D_triggered();
 			vW->setDrawObjectActivated(true);
-			vW->drawObject(vW->getCurrentObject(), vW->getCamera(), vW->getProjectionPlane(), ui->comboBoxProjectionType->currentIndex(), ui->comboBoxRepresentationType->currentIndex());
+			vW->drawObject(vW->getCurrentObject(), vW->getCamera(), vW->getProjectionPlane(), ui->comboBoxProjectionType->currentIndex(), ui->comboBoxRepresentationType->currentIndex(),nullptr);
 		}
 	}
 	else if (!openImage(fileName)) {
@@ -716,7 +715,7 @@ void ModelViewer::on_horizontalSliderZenit_valueChanged(int value) {
 	vW->getProjectionPlane().setProjectionPlane(vW->getProjectionPlane().azimut, radValue);
 	vW->clear();
 	if (vW->getDrawObjectActivated()) {
-		vW->drawObject(vW->getCurrentObject(), vW->getCamera(), vW->getProjectionPlane(), ui->comboBoxProjectionType->currentIndex(), ui->comboBoxRepresentationType->currentIndex());
+		vW->drawObject(vW->getCurrentObject(), vW->getCamera(), vW->getProjectionPlane(), ui->comboBoxProjectionType->currentIndex(), ui->comboBoxRepresentationType->currentIndex(),nullptr);
 	}
 }
 void ModelViewer::on_horizontalSliderAzimut_valueChanged(int value) {
@@ -724,7 +723,7 @@ void ModelViewer::on_horizontalSliderAzimut_valueChanged(int value) {
 	vW->getProjectionPlane().setProjectionPlane(radValue, vW->getProjectionPlane().zenit);
 	vW->clear();
 	if (vW->getDrawObjectActivated()) {
-		vW->drawObject(vW->getCurrentObject(), vW->getCamera(), vW->getProjectionPlane(), ui->comboBoxProjectionType->currentIndex(), ui->comboBoxRepresentationType->currentIndex());
+		vW->drawObject(vW->getCurrentObject(), vW->getCamera(), vW->getProjectionPlane(), ui->comboBoxProjectionType->currentIndex(), ui->comboBoxRepresentationType->currentIndex(),nullptr);
 	}
 
 }
@@ -739,21 +738,21 @@ void ModelViewer::on_comboBoxProjectionType_currentIndexChanged(int index) {
 	if (vW->getDrawObjectActivated()) {
 		vW->getCamera().position.z = ui->horizontalSliderCameraCoordZ->value();
 		vW->clear();
-		vW->drawObject(vW->getCurrentObject(), vW->getCamera(), vW->getProjectionPlane(), ui->comboBoxProjectionType->currentIndex(), ui->comboBoxRepresentationType->currentIndex());
+		vW->drawObject(vW->getCurrentObject(), vW->getCamera(), vW->getProjectionPlane(), ui->comboBoxProjectionType->currentIndex(), ui->comboBoxRepresentationType->currentIndex(), nullptr);
 	}
 }
 void ModelViewer::on_horizontalSliderCameraCoordZ_valueChanged(int value) {
 	vW->getCamera().position.z = value;
 	if (vW->getDrawObjectActivated()) {
 		vW->clear();
-		vW->drawObject(vW->getCurrentObject(), vW->getCamera(), vW->getProjectionPlane(), ui->comboBoxProjectionType->currentIndex(), ui->comboBoxRepresentationType->currentIndex());
+		vW->drawObject(vW->getCurrentObject(), vW->getCamera(), vW->getProjectionPlane(), ui->comboBoxProjectionType->currentIndex(), ui->comboBoxRepresentationType->currentIndex(), nullptr);
 	}
 }
 
 void ModelViewer::on_comboBoxRepresentationType_currentIndexChanged(int index) {
 	if (vW->getDrawObjectActivated()) {
 		vW->clear();
-		vW->drawObject(vW->getCurrentObject(), vW->getCamera(), vW->getProjectionPlane(), ui->comboBoxProjectionType->currentIndex(), ui->comboBoxRepresentationType->currentIndex());
+		vW->drawObject(vW->getCurrentObject(), vW->getCamera(), vW->getProjectionPlane(), ui->comboBoxProjectionType->currentIndex(), ui->comboBoxRepresentationType->currentIndex(), nullptr);
 	}
 }
 

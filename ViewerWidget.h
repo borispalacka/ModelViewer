@@ -163,6 +163,22 @@ public:
 		basisVectorV.z = basisVectorN.x * basisVectorU.y - basisVectorN.y * basisVectorU.x;
 	}
 };
+
+class LightSettings {
+public:
+	Vertex lightPosition = Vertex();
+	//coeficients for reflection, difusion, ambient
+	double rs = 0, rd = 0, ra = 0;
+	//mirror reflection sharpness
+	double h = 0; 
+	//Intesity of incident ligt ray (color)
+	QColor lightIntesity = QColor();
+	QColor lightIntesityAmbient = QColor();
+	LightSettings() {};
+	LightSettings(Vertex lightPos, double r_s, double r_d, double r_a, double h, QColor IL, QColor ILA) :lightPosition(lightPos), rs(r_s), rd(r_d), 
+		ra(r_a), h(h),lightIntesity(IL), lightIntesityAmbient(ILA) {};
+
+};
 //-------------------------------------------------------------
 
 class ViewerWidget :public QWidget {
@@ -271,11 +287,11 @@ public:
 	void drawCurveCoons(QVector<QPoint> points, QColor color);
 
 	//3D draw functions
-	void drawObject(const Object_H_edge& object, Camera camera, ProjectionPlane projectionPlane, int projectionType, int representationType);
+	void drawObject(const Object_H_edge& object, Camera camera, ProjectionPlane projectionPlane, int projectionType, int representationType, const LightSettings* ls);
 	QVector<Vertex> perspectiveCoordSystemTransformation(const Object_H_edge& object, int projectionType);
 	double baricentricInterpolation(const QVector<Vertex*> vertices, Vertex* currentVertex);
-	void fillObjectPolygonSetup(const QVector<Vertex*> vertices,QColor color, int fillingAlg);
-	void fillObjectPolygon(const QVector<Vertex*> vertices, QColor color, int fillingAlg);
+	void fillObjectPolygonSetup(const QVector<Vertex*> vertices,QColor color, int fillingAlg, const LightSettings* ls);
+	void fillObjectPolygon(const QVector<Vertex*> vertices, QVector<QColor> colors, int fillingAlg);
 
 
 
