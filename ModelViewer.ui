@@ -25,7 +25,7 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>748</width>
+         <width>707</width>
          <height>976</height>
         </rect>
        </property>
@@ -375,8 +375,38 @@
     <number>2</number>
    </attribute>
    <widget class="QWidget" name="dockWidgetContents_4">
-    <layout class="QFormLayout" name="formLayout_4">
-     <item row="4" column="0">
+    <layout class="QVBoxLayout" name="verticalLayout_3">
+     <item>
+      <widget class="QCheckBox" name="checkBoxCameraSettings">
+       <property name="text">
+        <string>Camera Settings</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QCheckBox" name="checkBoxLightSettings">
+       <property name="text">
+        <string>Light Settings</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QCheckBox" name="checkBoxVtkOutput">
+       <property name="text">
+        <string>VTK output</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
       <widget class="QGroupBox" name="groupBoxCameraSettings">
        <property name="title">
         <string>Camera Settings</string>
@@ -487,7 +517,7 @@
        </layout>
       </widget>
      </item>
-     <item row="7" column="0">
+     <item>
       <widget class="QGroupBox" name="groupBoxLightSettings">
        <property name="title">
         <string>Light Settings</string>
@@ -738,7 +768,7 @@
        </layout>
       </widget>
      </item>
-     <item row="8" column="0">
+     <item>
       <widget class="QGroupBox" name="groupBoxVtkOutput">
        <property name="title">
         <string>VTK file</string>
@@ -823,7 +853,7 @@
        </layout>
       </widget>
      </item>
-     <item row="9" column="0">
+     <item>
       <spacer name="verticalSpacer_3">
        <property name="orientation">
         <enum>Qt::Vertical</enum>
@@ -835,43 +865,6 @@
         </size>
        </property>
       </spacer>
-     </item>
-     <item row="6" column="0">
-      <widget class="QLabel" name="label_26">
-       <property name="text">
-        <string/>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="0">
-      <widget class="QCheckBox" name="checkBoxLightSettings">
-       <property name="text">
-        <string>Light Settings</string>
-       </property>
-       <property name="checked">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-     <item row="3" column="0">
-      <widget class="QCheckBox" name="checkBoxVtkOutput">
-       <property name="text">
-        <string>VTK output</string>
-       </property>
-       <property name="checked">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="0">
-      <widget class="QCheckBox" name="checkBoxCameraSettings">
-       <property name="text">
-        <string>Camera Settings</string>
-       </property>
-       <property name="checked">
-        <bool>true</bool>
-       </property>
-      </widget>
      </item>
     </layout>
    </widget>

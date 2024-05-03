@@ -333,7 +333,7 @@ void ViewerWidget::drawLineBresenham(QPoint start, QPoint end, QColor color) {
 void ViewerWidget::drawPolygon(QVector<QPoint> points, QColor color, int algType, int fillingAlgType) {
 	QVector<QPoint> tmpPoints = sutherlandHodgman(points);
 	if (tmpPoints.isEmpty() || tmpPoints.length() <= 2) {
-		qDebug() << "drawing polygon : none";
+		//qDebug() << "drawing polygon : none";
 		return;
 	}
 	points = tmpPoints;
@@ -344,10 +344,10 @@ void ViewerWidget::drawPolygon(QVector<QPoint> points, QColor color, int algType
 		return point.x() == points[0].x();
 		});
 	if (isHorizontalLine || isVerticalLine) {
-		qDebug() << "drawing polygon : none";
+		//qDebug() << "drawing polygon : none";
 		return;
 	}
-	qDebug() << "drawing polygon : " << points;
+	//qDebug() << "drawing polygon : " << points;
 	croppedBySutherlandHodgman = true;
 	if (fillingAlgType == 0) {
 		for (int i = 0; i < points.length(); i++) {
@@ -783,20 +783,25 @@ void ViewerWidget::fillObjectPolygonSetup(const QVector<Vertex*> vertices, QColo
 		QVector3D V = (camera.position - vertex).toQVector3D().normalized();
 		QVector3D R = (2 * (QVector3D::dotProduct(L, N)) * N - L).normalized();
 		//-------------------
-		//qDebug() << N.length() << L.length() << V.length() << R.length();
 		double red = 0;
 		double green = 0;
 		double blue = 0;
-		//Reflexion part of phong model
-		double coef = ls->rs * pow(QVector3D::dotProduct(V, R), ls->h);
-		red += ls->lightIntesity.red() * coef;
-		green += ls->lightIntesity.green() * coef;
-		blue += ls->lightIntesity.blue() * coef;
-		//Difusion part of phong model
-		coef = ls->rd * QVector3D::dotProduct(L, N);
-		red += ls->lightIntesity.red() * coef;
-		green += ls->lightIntesity.green() * coef;
-		blue += ls->lightIntesity.blue() * coef;
+
+		if (QVector3D::dotProduct(L, N) > 0) {
+			double coef;
+			//Reflexion part of phong model
+			if (QVector3D::dotProduct(V, R) > 0) {
+				coef = ls->rs * pow(QVector3D::dotProduct(V, R), ls->h);
+				red += ls->lightIntesity.red() * coef;
+				green += ls->lightIntesity.green() * coef;
+				blue += ls->lightIntesity.blue() * coef;
+			}
+			//Difusion part of phong model
+			coef = ls->rd * QVector3D::dotProduct(L, N);
+			red += ls->lightIntesity.red() * coef;
+			green += ls->lightIntesity.green() * coef;
+			blue += ls->lightIntesity.blue() * coef;
+		}
 		//Ambient part of phong model
 		red += ls->lightIntesityAmbient.red() * ls->ra;
 		green += ls->lightIntesityAmbient.green() * ls->ra;
@@ -864,7 +869,6 @@ void ViewerWidget::fillObjectPolygon(const QVector<Vertex*> vertices,const QVect
 	Vertex start = *vertices.last();
 	for (int i = 0; i < vertices.length(); i++) {
 		Vertex end = *vertices[i];
-
 		if (start.y > end.y) {
 			std::swap(start, end);
 		}
@@ -891,29 +895,28 @@ void ViewerWidget::fillObjectPolygon(const QVector<Vertex*> vertices,const QVect
 	QVector<double> lambda(3,0);
 	//current Vertex  indicates itteration position in image
 	Vertex currentVertex = Vertex(static_cast<int>(x1), ymin,0);
-	for (int y = ymin; y < ymax; y++) {
-		if (x1 != x2) {
-			for (int x = static_cast<int>(x1); x <= static_cast<int>(x2 + 0.5); x++) {
-				if (isInside(x, y)) {
-					interpolation(currentVertex, lambda[0], lambda[1], lambda[2]);
-					double z = lambda[0] * T[0]->z + lambda[1] * T[1]->z + lambda[2] * T[2]->z;
-					if (z > arrayOfZCoords.at(y).at(x)) {
-						if (usingLightSettings) {
-							for (int i = 0; i < 3; i++) {
-								red += lambda[i] * colors[i].red();
-								green += lambda[i] * colors[i].green();
-								blue += lambda[i] * colors[i].blue();
-							}
-							color = QColor(static_cast<int> (red), static_cast<int> (green), static_cast<int> (blue), 255);
-							red = 0; green = 0; blue = 0;
+	for (int y = ymin ; y < ymax; y++) {
+
+		for (int x = static_cast<int>(x1); x <= static_cast<int>(x2 + 0.5); x++) {
+			if (isInside(x, y)) {
+				interpolation(currentVertex, lambda[0], lambda[1], lambda[2]);
+				double z = lambda[0] * T[0]->z + lambda[1] * T[1]->z + lambda[2] * T[2]->z;
+				if (static_cast<int>(z + 0.5) >= static_cast<int>(arrayOfZCoords.at(y).at(x))) {
+					if (usingLightSettings) {
+						for (int i = 0; i < 3; i++) {
+							red += lambda[i] * colors[i].red();
+							green += lambda[i] * colors[i].green();
+							blue += lambda[i] * colors[i].blue();
 						}
-						arrayOfZCoords[y][x] = z;
-						arrayOfColors[y][x] = color;
-						setPixel(x, y, color);
+						color = QColor(static_cast<int> (red), static_cast<int> (green), static_cast<int> (blue), 255);
+						red = 0; green = 0; blue = 0;
 					}
+					arrayOfZCoords[y][x] = z;
+					arrayOfColors[y][x] = color;
+					setPixel(x, y, color);
 				}
-				currentVertex.x++;
 			}
+			currentVertex.x++;
 		}
 		x1 += 1 / edges[0].m;
 		x2 += 1 / edges[1].m;

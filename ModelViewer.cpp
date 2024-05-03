@@ -21,8 +21,6 @@ ModelViewer::ModelViewer(QWidget* parent)
 	ui->pushButtonSetColor->setStyleSheet(style_sheet);
 
 	ui->dockWidget_4->setHidden(true);
-
-	globalLightSettings = new LightSettings(Vertex(500, 500, 0), 1, 0.5, 1, 40, Qt::red, Qt::blue);
 }
 
 // Event filters
@@ -692,6 +690,11 @@ void ModelViewer::on_action3D_triggered() {
 	ui->dockWidget_4->setHidden(false);
 	ui->dockWidget->setHidden(true);
 	isIn3dMode = true;
+
+	ui->checkBoxLightSettings->setChecked(false);
+	ui->groupBoxLightSettings->setEnabled(false);
+	ui->groupBoxLightSettings->setHidden(true);
+
 	vW->clear();
 }
 
