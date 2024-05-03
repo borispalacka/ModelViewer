@@ -703,25 +703,30 @@ void ModelViewer::on_checkBoxLightSettings_stateChanged(int state) {
 
 		globalLightSettings = new LightSettings();
 		//Setting reflexion/diffusion/ambient coefficients default 0,0,0
-		globalLightSettings->rd = ui->horizontalSliderRdCoefficient->value() / 100.;
-		globalLightSettings->rs = ui->horizontalSliderRsCoefficient->value() / 100.;
-		globalLightSettings->ra = ui->horizontalSliderRaCoefficient->value() / 100.;
+		globalLightSettings->rd = 0.5;
+		globalLightSettings->rs = 0.5;
+		globalLightSettings->ra = 0.5;
+
+		ui->horizontalSliderRsCoefficient->setValue(50);
+		ui->horizontalSliderRdCoefficient->setValue(50);
+		ui->horizontalSliderRaCoefficient->setValue(50);
+
 
 		globalLightSettings->h = ui->horizontalSliderLightH->value();
 		//Setting light position default (500,500,500)
-		globalLightSettings->lightPosition = Vertex(500, 500, 500);
+		globalLightSettings->lightPosition = Vertex(500, 500, 100);
 		ui->spinBoxLightPosX->setValue(500);
 		ui->spinBoxLightPosY->setValue(500);
-		ui->spinBoxLightPosZ->setValue(500);
+		ui->spinBoxLightPosZ->setValue(100);
 		//Setting light intensity default (white)
 		globalLightSettings->lightIntesity = QColor(255, 255, 255);
 		ui->spinBoxLightIntensityRed->setValue(255);
 		ui->spinBoxLightIntensityGreen->setValue(255);
 		ui->spinBoxLightIntensityBlue->setValue(255);
 		//Setting light ambient intensity default (white)
-		globalLightSettings->lightIntesityAmbient = QColor(255, 255, 255);
-		ui->spinBoxLightIntensityAmbientRed->setValue(255);
-		ui->spinBoxLightIntensityAmbientGreen->setValue(255);
+		globalLightSettings->lightIntesityAmbient = QColor(0, 0, 255);
+		ui->spinBoxLightIntensityAmbientRed->setValue(0);
+		ui->spinBoxLightIntensityAmbientGreen->setValue(0);
 		ui->spinBoxLightIntensityAmbientBlue->setValue(255);
 	}
 	else {
@@ -730,7 +735,6 @@ void ModelViewer::on_checkBoxLightSettings_stateChanged(int state) {
 
 		globalLightSettings = nullptr;
 	}
-
 	if (vW->getDrawObjectActivated()) {
 		vW->clear();
 		vW->drawObject(vW->getCurrentObject(), vW->getCamera(), vW->getProjectionPlane(), ui->comboBoxProjectionType->currentIndex(), ui->comboBoxRepresentationType->currentIndex(), globalLightSettings);

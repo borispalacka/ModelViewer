@@ -781,8 +781,9 @@ void ViewerWidget::fillObjectPolygonSetup(const QVector<Vertex*> vertices, QColo
 		QVector3D N = vertex.toQVector3D().normalized();
 		QVector3D L = (ls->lightPosition - vertex).toQVector3D().normalized();
 		QVector3D V = (camera.position - vertex).toQVector3D().normalized();
-		QVector3D R = (2 * (QVector3D::dotProduct(L , N)) * N - L).normalized();
+		QVector3D R = (2 * (QVector3D::dotProduct(L, N)) * N - L).normalized();
 		//-------------------
+		//qDebug() << N.length() << L.length() << V.length() << R.length();
 		double red = 0;
 		double green = 0;
 		double blue = 0;
@@ -800,8 +801,9 @@ void ViewerWidget::fillObjectPolygonSetup(const QVector<Vertex*> vertices, QColo
 		red += ls->lightIntesityAmbient.red() * ls->ra;
 		green += ls->lightIntesityAmbient.green() * ls->ra;
 		blue += ls->lightIntesityAmbient.blue() * ls->ra;
-		qDebug() << static_cast<int>(red) << static_cast<int>(green) << static_cast<int>(blue);
-		return QColor(static_cast<int>(red), static_cast<int>(green),static_cast<int>(blue));
+
+		//qDebug() << static_cast<int>(red) << static_cast<int>(green) << static_cast<int>(blue);
+		return QColor(std::max(std::min(static_cast<int>(red), 255),0), std::max(std::min(static_cast<int>(green), 255) , 0), std::max(std::min(static_cast<int>(blue), 255),0));
 	};
 
 	if (vertices.length() != 3) {
@@ -848,7 +850,8 @@ void ViewerWidget::fillObjectPolygon(const QVector<Vertex*> vertices,const QVect
 		double m = 0;
 	};
 	const QVector<Vertex*>& T = oldVertices;
-	auto interpolationZCoord = [&](const Vertex& P, double& lambda1, double& lambda2, double& lambda3)->void  {
+	//Interpolation that interpolates thru given Point and Vertices of triangle
+	auto interpolation = [&](const Vertex& P, double& lambda1, double& lambda2, double& lambda3)->void  {
 		const double divider = abs(static_cast<double>(T[1]->x - T[0]->x) * (T[2]->y - T[0]->y) - (T[1]->y - T[0]->y) * (T[2]->x - T[0]->x));
 		lambda1 = abs((T[1]->x - P.x) * (T[2]->y - P.y) - (T[1]->y - P.y) * (T[2]->x - P.x)) / divider;
 		lambda2 = abs((T[0]->x - P.x) * (T[2]->y - P.y) - (T[0]->y - P.y) * (T[2]->x - P.x)) / divider;
@@ -859,7 +862,6 @@ void ViewerWidget::fillObjectPolygon(const QVector<Vertex*> vertices,const QVect
 	QColor color = colors.first();
 	bool usingLightSettings = colors.length() == 3;
 	Vertex start = *vertices.last();
-	int zmax = vertices[0]->z;
 	for (int i = 0; i < vertices.length(); i++) {
 		Vertex end = *vertices[i];
 
@@ -874,9 +876,6 @@ void ViewerWidget::fillObjectPolygon(const QVector<Vertex*> vertices,const QVect
 			edges.append(edge);
 		}
 		start = *vertices[i];
-		if (zmax < vertices[i]->z) {
-			zmax = vertices[i]->z;
-		}
 	}
 	if (edges.length() != 2) {
 		return;
@@ -890,23 +889,24 @@ void ViewerWidget::fillObjectPolygon(const QVector<Vertex*> vertices,const QVect
 	double x2 = edges[1].start.x;
 	double red = 0, green = 0, blue = 0;
 	QVector<double> lambda(3,0);
+	//current Vertex  indicates itteration position in image
 	Vertex currentVertex = Vertex(static_cast<int>(x1), ymin,0);
 	for (int y = ymin; y < ymax; y++) {
 		if (x1 != x2) {
-			for (int x = static_cast<int>(x1); x <= static_cast<int>(x2); x++) {
+			for (int x = static_cast<int>(x1); x <= static_cast<int>(x2 + 0.5); x++) {
 				if (isInside(x, y)) {
-					interpolationZCoord(currentVertex, lambda[0], lambda[1], lambda[2]);
+					interpolation(currentVertex, lambda[0], lambda[1], lambda[2]);
 					double z = lambda[0] * T[0]->z + lambda[1] * T[1]->z + lambda[2] * T[2]->z;
-					if (usingLightSettings) {
-						for (int i = 0; i < 3; i++) {
-							red += lambda[i] * colors[i].red();
-							green += lambda[i] * colors[i].green();
-							blue += lambda[i] * colors[i].blue();
-						}
-						color = QColor(static_cast<int> (red), static_cast<int> (green), static_cast<int> (blue), 255);
-						red = 0; green = 0; blue = 0;
-					}
 					if (z > arrayOfZCoords.at(y).at(x)) {
+						if (usingLightSettings) {
+							for (int i = 0; i < 3; i++) {
+								red += lambda[i] * colors[i].red();
+								green += lambda[i] * colors[i].green();
+								blue += lambda[i] * colors[i].blue();
+							}
+							color = QColor(static_cast<int> (red), static_cast<int> (green), static_cast<int> (blue), 255);
+							red = 0; green = 0; blue = 0;
+						}
 						arrayOfZCoords[y][x] = z;
 						arrayOfColors[y][x] = color;
 						setPixel(x, y, color);
@@ -917,7 +917,7 @@ void ViewerWidget::fillObjectPolygon(const QVector<Vertex*> vertices,const QVect
 		}
 		x1 += 1 / edges[0].m;
 		x2 += 1 / edges[1].m;
-		currentVertex.x = x1;
+		currentVertex.x = static_cast<int>(x1);
 		currentVertex.y++;
 	}
 	update();
