@@ -85,6 +85,31 @@ private slots:
 	void on_comboBoxProjectionType_currentIndexChanged(int index);
 	void on_horizontalSliderCameraCoordZ_valueChanged(int value);
 	void on_comboBoxRepresentationType_currentIndexChanged(int index);
+	//Light settings
+	// 
+	//reflexion/difusion/ambient coefficients handlers
+	void on_horizontalSliderRdCoefficient_valueChanged(int value);
+	void on_horizontalSliderRsCoefficient_valueChanged(int value);
+	void on_horizontalSliderRaCoefficient_valueChanged(int value);
+	void on_horizontalSliderLightH_valueChanged(int value);
+
+	//light position handlers
+	void on_spinBoxLightPosX_valueChanged(int value);
+	void on_spinBoxLightPosY_valueChanged(int value);
+	void on_spinBoxLightPosZ_valueChanged(int value);
+
+	//Incident light ray handlers
+	void on_spinBoxLightIntensityRed_valueChanged(int value);
+	void on_spinBoxLightIntensityGreen_valueChanged(int value);
+	void on_spinBoxLightIntensityBlue_valueChanged(int value);
+
+	//Ambient light reflexion handlers
+	void on_spinBoxLightIntensityAmbientRed_valueChanged(int value);
+	void on_spinBoxLightIntensityAmbientGreen_valueChanged(int value);
+	void on_spinBoxLightIntensityAmbientBlue_valueChanged(int value);
+
+
+
 	void on_action2D_triggered();
 	void on_action3D_triggered();
 };

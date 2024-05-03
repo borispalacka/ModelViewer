@@ -757,4 +757,103 @@ void ModelViewer::on_comboBoxRepresentationType_currentIndexChanged(int index) {
 		vW->drawObject(vW->getCurrentObject(), vW->getCamera(), vW->getProjectionPlane(), ui->comboBoxProjectionType->currentIndex(), ui->comboBoxRepresentationType->currentIndex(), globalLightSettings);
 	}
 }
+//Light settings
+void ModelViewer::on_horizontalSliderRdCoefficient_valueChanged(int value) {
+	// value corrected to interval [0,1]
+	globalLightSettings->rd = value / 100.;
+	if (vW->getDrawObjectActivated()) {
+		vW->clear();
+		vW->drawObject(vW->getCurrentObject(), vW->getCamera(), vW->getProjectionPlane(), ui->comboBoxProjectionType->currentIndex(), ui->comboBoxRepresentationType->currentIndex(), globalLightSettings);
+	}
+}
+void ModelViewer::on_horizontalSliderRsCoefficient_valueChanged(int value) {
+	// value corrected to interval [0,1]
+	globalLightSettings->rs = value / 100.;
+	if (vW->getDrawObjectActivated()) {
+		vW->clear();
+		vW->drawObject(vW->getCurrentObject(), vW->getCamera(), vW->getProjectionPlane(), ui->comboBoxProjectionType->currentIndex(), ui->comboBoxRepresentationType->currentIndex(), globalLightSettings);
+	}
+}
+void ModelViewer::on_horizontalSliderRaCoefficient_valueChanged(int value) {
+	// value corrected to interval [0,1]
+	globalLightSettings->ra = value / 100.;
+	if (vW->getDrawObjectActivated()) {
+		vW->clear();
+		vW->drawObject(vW->getCurrentObject(), vW->getCamera(), vW->getProjectionPlane(), ui->comboBoxProjectionType->currentIndex(), ui->comboBoxRepresentationType->currentIndex(), globalLightSettings);
+	}
+}
+void ModelViewer::on_horizontalSliderLightH_valueChanged(int value) {
+	globalLightSettings->h = value;
+	if (vW->getDrawObjectActivated()) {
+		vW->clear();
+		vW->drawObject(vW->getCurrentObject(), vW->getCamera(), vW->getProjectionPlane(), ui->comboBoxProjectionType->currentIndex(), ui->comboBoxRepresentationType->currentIndex(), globalLightSettings);
+	}
+}
+
+void ModelViewer::on_spinBoxLightPosX_valueChanged(int value){
+	globalLightSettings->lightPosition.x = value;
+	if (vW->getDrawObjectActivated()) {
+		vW->clear();
+		vW->drawObject(vW->getCurrentObject(), vW->getCamera(), vW->getProjectionPlane(), ui->comboBoxProjectionType->currentIndex(), ui->comboBoxRepresentationType->currentIndex(), globalLightSettings);
+	}
+}
+void ModelViewer::on_spinBoxLightPosYvalueChanged(int value) {
+	globalLightSettings->lightPosition.y = value;
+	if (vW->getDrawObjectActivated()) {
+		vW->clear();
+		vW->drawObject(vW->getCurrentObject(), vW->getCamera(), vW->getProjectionPlane(), ui->comboBoxProjectionType->currentIndex(), ui->comboBoxRepresentationType->currentIndex(), globalLightSettings);
+	}
+}
+void ModelViewer::on_spinBoxLightPosZ_valueChanged(int value) {
+	globalLightSettings->lightPosition.z = value;
+	if (vW->getDrawObjectActivated()) {
+		vW->clear();
+		vW->drawObject(vW->getCurrentObject(), vW->getCamera(), vW->getProjectionPlane(), ui->comboBoxProjectionType->currentIndex(), ui->comboBoxRepresentationType->currentIndex(), globalLightSettings);
+	}
+}
+
+
+void ModelViewer::on_spinBoxLightIntensityRed_valueChanged(int value) {
+	globalLightSettings->lightIntesity = QColor(ui->spinBoxLightIntensityRed->value(), ui->spinBoxLightIntensityGreen->value(), ui->spinBoxLightIntensityBlue->value());
+	if (vW->getDrawObjectActivated()) {
+		vW->clear();
+		vW->drawObject(vW->getCurrentObject(), vW->getCamera(), vW->getProjectionPlane(), ui->comboBoxProjectionType->currentIndex(), ui->comboBoxRepresentationType->currentIndex(), globalLightSettings);
+	}
+}
+void ModelViewer::on_spinBoxLightIntensityGreen_valueChanged(int value) {
+	globalLightSettings->lightIntesity = QColor(ui->spinBoxLightIntensityRed->value(), ui->spinBoxLightIntensityGreen->value(), ui->spinBoxLightIntensityBlue->value());
+	if (vW->getDrawObjectActivated()) {
+		vW->clear();
+		vW->drawObject(vW->getCurrentObject(), vW->getCamera(), vW->getProjectionPlane(), ui->comboBoxProjectionType->currentIndex(), ui->comboBoxRepresentationType->currentIndex(), globalLightSettings);
+	}
+}
+void ModelViewer::on_spinBoxLightIntensityBlue_valueChanged(int value) {
+	globalLightSettings->lightIntesity = QColor(ui->spinBoxLightIntensityRed->value(), ui->spinBoxLightIntensityGreen->value(), ui->spinBoxLightIntensityBlue->value());
+	if (vW->getDrawObjectActivated()) {
+		vW->clear();
+		vW->drawObject(vW->getCurrentObject(), vW->getCamera(), vW->getProjectionPlane(), ui->comboBoxProjectionType->currentIndex(), ui->comboBoxRepresentationType->currentIndex(), globalLightSettings);
+	}
+}
+
+void ModelViewer::on_spinBoxLightIntensityAmbientRed_valueChanged(int value) {
+	globalLightSettings->lightIntesityAmbient = QColor(ui->spinBoxLightIntensityAmbientRed->value(), ui->spinBoxLightIntensityAmbientGreen->value(), ui->spinBoxLightIntensityAmbientBlue->value());
+	if (vW->getDrawObjectActivated()) {
+		vW->clear();
+		vW->drawObject(vW->getCurrentObject(), vW->getCamera(), vW->getProjectionPlane(), ui->comboBoxProjectionType->currentIndex(), ui->comboBoxRepresentationType->currentIndex(), globalLightSettings);
+	}
+}
+void ModelViewer::on_spinBoxLightIntensityAmbientGreen_valueChanged(int value) {
+	globalLightSettings->lightIntesityAmbient = QColor(ui->spinBoxLightIntensityAmbientRed->value(), ui->spinBoxLightIntensityAmbientGreen->value(), ui->spinBoxLightIntensityAmbientBlue->value());
+	if (vW->getDrawObjectActivated()) {
+		vW->clear();
+		vW->drawObject(vW->getCurrentObject(), vW->getCamera(), vW->getProjectionPlane(), ui->comboBoxProjectionType->currentIndex(), ui->comboBoxRepresentationType->currentIndex(), globalLightSettings);
+	}
+}
+void ModelViewer::on_spinBoxLightIntensityAmbientBlue_valueChanged(int value) {
+	globalLightSettings->lightIntesityAmbient = QColor(ui->spinBoxLightIntensityAmbientRed->value(), ui->spinBoxLightIntensityAmbientGreen->value(), ui->spinBoxLightIntensityAmbientBlue->value());
+	if (vW->getDrawObjectActivated()) {
+		vW->clear();
+		vW->drawObject(vW->getCurrentObject(), vW->getCamera(), vW->getProjectionPlane(), ui->comboBoxProjectionType->currentIndex(), ui->comboBoxRepresentationType->currentIndex(), globalLightSettings);
+	}
+}
 

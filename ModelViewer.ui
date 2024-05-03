@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1243</width>
+    <width>1280</width>
     <height>966</height>
    </rect>
   </property>
@@ -14,36 +14,32 @@
    <string>ModelViewer</string>
   </property>
   <widget class="QWidget" name="centralWidget">
-   <widget class="QScrollArea" name="scrollArea">
-    <property name="geometry">
-     <rect>
-      <x>9</x>
-      <y>9</y>
-      <width>16</width>
-      <height>16</height>
-     </rect>
-    </property>
-    <property name="widgetResizable">
-     <bool>true</bool>
-    </property>
-    <widget class="QWidget" name="scrollAreaWidgetContents">
-     <property name="geometry">
-      <rect>
-       <x>0</x>
-       <y>0</y>
-       <width>16</width>
-       <height>16</height>
-      </rect>
-     </property>
-    </widget>
-   </widget>
+   <layout class="QGridLayout" name="gridLayout_4">
+    <item row="0" column="0">
+     <widget class="QScrollArea" name="scrollArea">
+      <property name="widgetResizable">
+       <bool>true</bool>
+      </property>
+      <widget class="QWidget" name="scrollAreaWidgetContents">
+       <property name="geometry">
+        <rect>
+         <x>0</x>
+         <y>0</y>
+         <width>754</width>
+         <height>886</height>
+        </rect>
+       </property>
+      </widget>
+     </widget>
+    </item>
+   </layout>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1243</width>
+     <width>1280</width>
      <height>21</height>
     </rect>
    </property>
@@ -389,7 +385,7 @@
         <item row="1" column="1">
          <widget class="QSlider" name="horizontalSliderRsCoefficient">
           <property name="maximum">
-           <number>1</number>
+           <number>100</number>
           </property>
           <property name="orientation">
            <enum>Qt::Horizontal</enum>
@@ -397,7 +393,7 @@
          </widget>
         </item>
         <item row="10" column="1">
-         <widget class="QSpinBox" name="spinBoxLightIntesityRed">
+         <widget class="QSpinBox" name="spinBoxLightIntensityRed">
           <property name="maximum">
            <number>255</number>
           </property>
@@ -454,7 +450,7 @@
         <item row="0" column="1">
          <widget class="QSlider" name="horizontalSliderRdCoefficient">
           <property name="maximum">
-           <number>1</number>
+           <number>100</number>
           </property>
           <property name="orientation">
            <enum>Qt::Horizontal</enum>
@@ -462,12 +458,12 @@
          </widget>
         </item>
         <item row="3" column="1">
-         <widget class="QSlider" name="horizontalSliderLIghtH">
+         <widget class="QSlider" name="horizontalSliderLightH">
           <property name="minimum">
            <number>1</number>
           </property>
           <property name="maximum">
-           <number>100</number>
+           <number>1000</number>
           </property>
           <property name="orientation">
            <enum>Qt::Horizontal</enum>
@@ -503,7 +499,7 @@
          </widget>
         </item>
         <item row="12" column="1">
-         <widget class="QSpinBox" name="spinBoxLightIntesityBlue">
+         <widget class="QSpinBox" name="spinBoxLightIntensityBlue">
           <property name="maximum">
            <number>255</number>
           </property>
@@ -571,7 +567,7 @@
         <item row="2" column="1">
          <widget class="QSlider" name="horizontalSliderRaCoefficient">
           <property name="maximum">
-           <number>1</number>
+           <number>100</number>
           </property>
           <property name="orientation">
            <enum>Qt::Horizontal</enum>
@@ -593,21 +589,21 @@
          </widget>
         </item>
         <item row="14" column="1">
-         <widget class="QSpinBox" name="spinBoxLightIntesityAmbientRed">
+         <widget class="QSpinBox" name="spinBoxLightIntensityAmbientRed">
           <property name="maximum">
            <number>255</number>
           </property>
          </widget>
         </item>
         <item row="15" column="1">
-         <widget class="QSpinBox" name="spinBoxLightIntesityAmbientGreen">
+         <widget class="QSpinBox" name="spinBoxLightIntensityAmbientGreen">
           <property name="maximum">
            <number>255</number>
           </property>
          </widget>
         </item>
         <item row="16" column="1">
-         <widget class="QSpinBox" name="spinBoxLightIntesityAmbientBlue">
+         <widget class="QSpinBox" name="spinBoxLightIntensityAmbientBlue">
           <property name="maximum">
            <number>255</number>
           </property>
