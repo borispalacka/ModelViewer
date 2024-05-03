@@ -783,19 +783,25 @@ void ViewerWidget::fillObjectPolygonSetup(const QVector<Vertex*> vertices, QColo
 		QVector3D V = (camera.position - vertex).toQVector3D().normalized();
 		QVector3D R = (2 * (QVector3D::dotProduct(L , N)) * N - L).normalized();
 		//-------------------
-
+		double red = 0;
+		double green = 0;
+		double blue = 0;
 		//Reflexion part of phong model
 		double coef = ls->rs * pow(QVector3D::dotProduct(V, R), ls->h);
-		QColor I_s = QColor(ls->lightIntesity.red() * coef, ls->lightIntesity.green() * coef, ls->lightIntesity.blue() * coef);
-
+		red += ls->lightIntesity.red() * coef;
+		green += ls->lightIntesity.green() * coef;
+		blue += ls->lightIntesity.blue() * coef;
 		//Difusion part of phong model
 		coef = ls->rd * QVector3D::dotProduct(L, N);
-		QColor I_d = QColor(ls->lightIntesity.red() * coef, ls->lightIntesity.green() * coef, ls->lightIntesity.blue() * coef);
-
+		red += ls->lightIntesity.red() * coef;
+		green += ls->lightIntesity.green() * coef;
+		blue += ls->lightIntesity.blue() * coef;
 		//Ambient part of phong model
-		QColor I_a = QColor(ls->lightIntesity.red() * ls->ra, ls->lightIntesity.green() * ls->ra, ls->lightIntesity.blue() * ls->ra);
-
-		return QColor(I_s.red() + I_d.red() + I_a.red(), I_s.blue() + I_d.blue() + I_a.blue(), I_s.green() + I_d.green() + I_a.green());
+		red += ls->lightIntesityAmbient.red() * ls->ra;
+		green += ls->lightIntesityAmbient.green() * ls->ra;
+		blue += ls->lightIntesityAmbient.blue() * ls->ra;
+		qDebug() << static_cast<int>(red) << static_cast<int>(green) << static_cast<int>(blue);
+		return QColor(static_cast<int>(red), static_cast<int>(green),static_cast<int>(blue));
 	};
 
 	if (vertices.length() != 3) {
@@ -821,34 +827,33 @@ void ViewerWidget::fillObjectPolygonSetup(const QVector<Vertex*> vertices, QColo
 		}
 		});
 	if (T[0]->y == T[1]->y || T[1]->y == T[2]->y) {
-		fillObjectPolygon(T, colors, fillAlgType);
+		fillObjectPolygon(T, vertices,colors, fillAlgType);
 		return;
 	}
 	double m = static_cast<double>(T[2]->y - T[0]->y) / (T[2]->x - T[0]->x);
 	Vertex *P = new Vertex((T[1]->y - T[0]->y) / m + T[0]->x, T[1]->y,0);
-	P->z = baricentricInterpolation(T, P);
 	if (T[1]->x < P->x) {
-		fillObjectPolygon({ T[0],T[1],P }, colors, fillAlgType);
-		fillObjectPolygon({ T[1], P, T[2] }, colors, fillAlgType);
+		fillObjectPolygon({ T[0],T[1],P }, vertices, colors, fillAlgType);
+		fillObjectPolygon({ T[1], P, T[2] }, vertices, colors, fillAlgType);
 	}
 	else {
-		fillObjectPolygon({ T[0], P, T[1] }, colors, fillAlgType);
-		fillObjectPolygon({ P,T[1],T[2] }, colors, fillAlgType);
+		fillObjectPolygon({ T[0], P, T[1] }, vertices, colors, fillAlgType);
+		fillObjectPolygon({ P,T[1],T[2] }, vertices, colors, fillAlgType);
 	}
 }
-void ViewerWidget::fillObjectPolygon(const QVector<Vertex*> vertices,QVector<QColor> colors, int fillAlgType) {
+void ViewerWidget::fillObjectPolygon(const QVector<Vertex*> vertices,const QVector<Vertex*> oldVertices,QVector<QColor> colors, int fillAlgType) {
 	struct Edge {
 		Vertex start;
 		Vertex end;
 		double m = 0;
 	};
-	const QVector<Vertex*>& T = vertices;
+	const QVector<Vertex*>& T = oldVertices;
 	auto interpolationZCoord = [&](const Vertex& P, double& lambda1, double& lambda2, double& lambda3)->void  {
 		const double divider = abs(static_cast<double>(T[1]->x - T[0]->x) * (T[2]->y - T[0]->y) - (T[1]->y - T[0]->y) * (T[2]->x - T[0]->x));
 		lambda1 = abs((T[1]->x - P.x) * (T[2]->y - P.y) - (T[1]->y - P.y) * (T[2]->x - P.x)) / divider;
 		lambda2 = abs((T[0]->x - P.x) * (T[2]->y - P.y) - (T[0]->y - P.y) * (T[2]->x - P.x)) / divider;
 		lambda3 = 1 - lambda1 - lambda2;
-		};
+	};
 
 	QVector<Edge> edges;
 	QColor color = colors.first();

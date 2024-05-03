@@ -77,7 +77,12 @@ private slots:
 
 	void on_toolButtonSymmetry_clicked();
 
-	//3D mode 
+	//3D mode
+	// 
+	void on_checkBoxCameraSettings_stateChanged(int state);
+	void on_checkBoxLightSettings_stateChanged(int state);
+	void on_checkBoxVtkOutput_stateChanged(int state);
+
 	void on_comboBoxTypeCreateVTK_currentIndexChanged(int index);
 	void on_pushButtonCreateVTK_clicked();
 	void on_horizontalSliderZenit_valueChanged(int value);

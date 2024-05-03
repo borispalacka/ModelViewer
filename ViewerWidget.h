@@ -170,12 +170,12 @@ public:
 	//coeficients for reflection, difusion, ambient
 	double rs = 0, rd = 0, ra = 0;
 	//mirror reflection sharpness
-	double h = 0; 
+	int h = 0; 
 	//Intesity of incident ligt ray (color)
-	QColor lightIntesity = QColor();
-	QColor lightIntesityAmbient = QColor();
+	QColor lightIntesity = QColor(0,0,0);
+	QColor lightIntesityAmbient = QColor(0,0,0);
 	LightSettings() {};
-	LightSettings(Vertex lightPos, double r_s, double r_d, double r_a, double h, QColor IL, QColor ILA) :lightPosition(lightPos), rs(r_s), rd(r_d), 
+	LightSettings(Vertex lightPos, double r_s, double r_d, double r_a, int h, QColor IL, QColor ILA) :lightPosition(lightPos), rs(r_s), rd(r_d), 
 		ra(r_a), h(h),lightIntesity(IL), lightIntesityAmbient(ILA) {};
 
 };
@@ -291,7 +291,7 @@ public:
 	QVector<Vertex> perspectiveCoordSystemTransformation(const Object_H_edge& object, int projectionType);
 	double baricentricInterpolation(const QVector<Vertex*> vertices, Vertex* currentVertex);
 	void fillObjectPolygonSetup(const QVector<Vertex*> vertices,QColor color, int fillingAlg, const LightSettings* ls);
-	void fillObjectPolygon(const QVector<Vertex*> vertices, QVector<QColor> colors, int fillingAlg);
+	void fillObjectPolygon(const QVector<Vertex*> vertices, const QVector<Vertex*> oldVertices, QVector<QColor> colors, int fillingAlg);
 
 
 

@@ -696,6 +696,67 @@ void ModelViewer::on_action3D_triggered() {
 }
 
 //3D slots
+void ModelViewer::on_checkBoxLightSettings_stateChanged(int state) {
+	if (ui->checkBoxLightSettings->isChecked()) {
+		ui->groupBoxLightSettings->setEnabled(true);
+		ui->groupBoxLightSettings->setHidden(false);
+
+		globalLightSettings = new LightSettings();
+		//Setting reflexion/diffusion/ambient coefficients default 0,0,0
+		globalLightSettings->rd = ui->horizontalSliderRdCoefficient->value() / 100.;
+		globalLightSettings->rs = ui->horizontalSliderRsCoefficient->value() / 100.;
+		globalLightSettings->ra = ui->horizontalSliderRaCoefficient->value() / 100.;
+
+		globalLightSettings->h = ui->horizontalSliderLightH->value();
+		//Setting light position default (500,500,500)
+		globalLightSettings->lightPosition = Vertex(500, 500, 500);
+		ui->spinBoxLightPosX->setValue(500);
+		ui->spinBoxLightPosY->setValue(500);
+		ui->spinBoxLightPosZ->setValue(500);
+		//Setting light intensity default (white)
+		globalLightSettings->lightIntesity = QColor(255, 255, 255);
+		ui->spinBoxLightIntensityRed->setValue(255);
+		ui->spinBoxLightIntensityGreen->setValue(255);
+		ui->spinBoxLightIntensityBlue->setValue(255);
+		//Setting light ambient intensity default (white)
+		globalLightSettings->lightIntesityAmbient = QColor(255, 255, 255);
+		ui->spinBoxLightIntensityAmbientRed->setValue(255);
+		ui->spinBoxLightIntensityAmbientGreen->setValue(255);
+		ui->spinBoxLightIntensityAmbientBlue->setValue(255);
+	}
+	else {
+		ui->groupBoxLightSettings->setEnabled(false);
+		ui->groupBoxLightSettings->setHidden(true);
+
+		globalLightSettings = nullptr;
+	}
+
+	if (vW->getDrawObjectActivated()) {
+		vW->clear();
+		vW->drawObject(vW->getCurrentObject(), vW->getCamera(), vW->getProjectionPlane(), ui->comboBoxProjectionType->currentIndex(), ui->comboBoxRepresentationType->currentIndex(), globalLightSettings);
+	}
+}
+void ModelViewer::on_checkBoxCameraSettings_stateChanged(int state) {
+	if (ui->checkBoxCameraSettings->isChecked()) {
+		ui->groupBoxCameraSettings->setEnabled(true);
+		ui->groupBoxCameraSettings->setHidden(false);
+	}
+	else {
+		ui->groupBoxCameraSettings->setEnabled(false);
+		ui->groupBoxCameraSettings->setHidden(true);
+	}
+}
+void ModelViewer::on_checkBoxVtkOutput_stateChanged(int state) {
+	if (ui->checkBoxVtkOutput->isChecked()) {
+		ui->groupBoxVtkOutput->setEnabled(true);
+		ui->groupBoxVtkOutput->setHidden(false);
+	}
+	else {
+		ui->groupBoxVtkOutput->setEnabled(false);
+		ui->groupBoxVtkOutput->setHidden(true);
+	}
+}
+
 void ModelViewer::on_comboBoxTypeCreateVTK_currentIndexChanged(int index) {
 	if (index == 0) {
 		ui->spinBoxLongLatCount->setEnabled(false);
@@ -765,6 +826,7 @@ void ModelViewer::on_horizontalSliderRdCoefficient_valueChanged(int value) {
 		vW->clear();
 		vW->drawObject(vW->getCurrentObject(), vW->getCamera(), vW->getProjectionPlane(), ui->comboBoxProjectionType->currentIndex(), ui->comboBoxRepresentationType->currentIndex(), globalLightSettings);
 	}
+	qDebug() << "rd coef : " << globalLightSettings->rd;
 }
 void ModelViewer::on_horizontalSliderRsCoefficient_valueChanged(int value) {
 	// value corrected to interval [0,1]
@@ -773,6 +835,7 @@ void ModelViewer::on_horizontalSliderRsCoefficient_valueChanged(int value) {
 		vW->clear();
 		vW->drawObject(vW->getCurrentObject(), vW->getCamera(), vW->getProjectionPlane(), ui->comboBoxProjectionType->currentIndex(), ui->comboBoxRepresentationType->currentIndex(), globalLightSettings);
 	}
+	qDebug() << "rs coef : " << globalLightSettings->rs;
 }
 void ModelViewer::on_horizontalSliderRaCoefficient_valueChanged(int value) {
 	// value corrected to interval [0,1]
@@ -781,6 +844,7 @@ void ModelViewer::on_horizontalSliderRaCoefficient_valueChanged(int value) {
 		vW->clear();
 		vW->drawObject(vW->getCurrentObject(), vW->getCamera(), vW->getProjectionPlane(), ui->comboBoxProjectionType->currentIndex(), ui->comboBoxRepresentationType->currentIndex(), globalLightSettings);
 	}
+	qDebug() << "ra coef : " << globalLightSettings->ra;
 }
 void ModelViewer::on_horizontalSliderLightH_valueChanged(int value) {
 	globalLightSettings->h = value;
@@ -788,6 +852,7 @@ void ModelViewer::on_horizontalSliderLightH_valueChanged(int value) {
 		vW->clear();
 		vW->drawObject(vW->getCurrentObject(), vW->getCamera(), vW->getProjectionPlane(), ui->comboBoxProjectionType->currentIndex(), ui->comboBoxRepresentationType->currentIndex(), globalLightSettings);
 	}
+	qDebug() << "H : " << globalLightSettings->h;
 }
 
 void ModelViewer::on_spinBoxLightPosX_valueChanged(int value){
@@ -797,7 +862,7 @@ void ModelViewer::on_spinBoxLightPosX_valueChanged(int value){
 		vW->drawObject(vW->getCurrentObject(), vW->getCamera(), vW->getProjectionPlane(), ui->comboBoxProjectionType->currentIndex(), ui->comboBoxRepresentationType->currentIndex(), globalLightSettings);
 	}
 }
-void ModelViewer::on_spinBoxLightPosYvalueChanged(int value) {
+void ModelViewer::on_spinBoxLightPosY_valueChanged(int value) {
 	globalLightSettings->lightPosition.y = value;
 	if (vW->getDrawObjectActivated()) {
 		vW->clear();
