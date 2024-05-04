@@ -523,8 +523,22 @@
         <string>Light Settings</string>
        </property>
        <layout class="QGridLayout" name="gridLayout_3">
-        <item row="1" column="1">
-         <widget class="QSlider" name="horizontalSliderRsCoefficient">
+        <item row="8" column="1">
+         <widget class="QLabel" name="label_15">
+          <property name="text">
+           <string>Y</string>
+          </property>
+         </widget>
+        </item>
+        <item row="15" column="1">
+         <widget class="QLabel" name="label_22">
+          <property name="text">
+           <string>Light Ambient :</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="2">
+         <widget class="QSlider" name="horizontalSliderRdCoefficient">
           <property name="maximum">
            <number>100</number>
           </property>
@@ -533,34 +547,35 @@
           </property>
          </widget>
         </item>
-        <item row="10" column="1">
-         <widget class="QSpinBox" name="spinBoxLightIntensityRed">
+        <item row="12" column="1">
+         <widget class="QLabel" name="label_19">
+          <property name="text">
+           <string>Red : </string>
+          </property>
+         </widget>
+        </item>
+        <item row="18" column="2">
+         <widget class="QSpinBox" name="spinBoxLightIntensityAmbientBlue">
           <property name="maximum">
            <number>255</number>
           </property>
          </widget>
         </item>
-        <item row="5" column="1">
-         <widget class="QSpinBox" name="spinBoxLightPosX">
-          <property name="minimum">
-           <number>-1000</number>
-          </property>
-          <property name="maximum">
-           <number>1000</number>
-          </property>
-          <property name="singleStep">
-           <number>10</number>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="0">
-         <widget class="QLabel" name="label_11">
+        <item row="2" column="1">
+         <widget class="QLabel" name="label_10">
           <property name="text">
-           <string>Rs :</string>
+           <string>Rd : </string>
           </property>
          </widget>
         </item>
-        <item row="7" column="1">
+        <item row="6" column="1">
+         <widget class="QLabel" name="label_13">
+          <property name="text">
+           <string>Light Position :</string>
+          </property>
+         </widget>
+        </item>
+        <item row="9" column="2">
          <widget class="QSpinBox" name="spinBoxLightPosZ">
           <property name="minimum">
            <number>-1000</number>
@@ -573,29 +588,50 @@
           </property>
          </widget>
         </item>
-        <item row="13" column="0">
-         <widget class="QLabel" name="label_22">
+        <item row="18" column="1">
+         <widget class="QLabel" name="label_25">
           <property name="text">
-           <string>Light Ambient :</string>
+           <string>Blue :</string>
           </property>
          </widget>
         </item>
-        <item row="14" column="0">
-         <widget class="QLabel" name="label_23">
+        <item row="7" column="1">
+         <widget class="QLabel" name="label_14">
           <property name="text">
-           <string>Red :</string>
+           <string>X </string>
           </property>
          </widget>
         </item>
-        <item row="15" column="0">
-         <widget class="QLabel" name="label_24">
-          <property name="text">
-           <string>Green :</string>
+        <item row="16" column="2">
+         <widget class="QSpinBox" name="spinBoxLightIntensityAmbientRed">
+          <property name="maximum">
+           <number>255</number>
           </property>
          </widget>
         </item>
-        <item row="0" column="1">
-         <widget class="QSlider" name="horizontalSliderRdCoefficient">
+        <item row="9" column="1">
+         <widget class="QLabel" name="label_16">
+          <property name="text">
+           <string>Z</string>
+          </property>
+         </widget>
+        </item>
+        <item row="14" column="1">
+         <widget class="QLabel" name="label_21">
+          <property name="text">
+           <string>Blue :</string>
+          </property>
+         </widget>
+        </item>
+        <item row="13" column="2">
+         <widget class="QSpinBox" name="spinBoxLightIntensityGreen">
+          <property name="maximum">
+           <number>255</number>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="2">
+         <widget class="QSlider" name="horizontalSliderRsCoefficient">
           <property name="maximum">
            <number>100</number>
           </property>
@@ -604,7 +640,7 @@
           </property>
          </widget>
         </item>
-        <item row="3" column="1">
+        <item row="5" column="2">
          <widget class="QSlider" name="horizontalSliderLightH">
           <property name="minimum">
            <number>1</number>
@@ -623,63 +659,73 @@
           </property>
          </widget>
         </item>
-        <item row="10" column="0">
-         <widget class="QLabel" name="label_19">
+        <item row="16" column="1">
+         <widget class="QLabel" name="label_23">
           <property name="text">
-           <string>Red : </string>
+           <string>Red :</string>
           </property>
          </widget>
         </item>
-        <item row="0" column="0">
-         <widget class="QLabel" name="label_10">
-          <property name="text">
-           <string>Rd : </string>
+        <item row="12" column="2">
+         <widget class="QSpinBox" name="spinBoxLightIntensityRed">
+          <property name="maximum">
+           <number>255</number>
           </property>
          </widget>
         </item>
-        <item row="3" column="0">
+        <item row="5" column="1">
          <widget class="QLabel" name="label_17">
           <property name="text">
            <string>h :</string>
           </property>
          </widget>
         </item>
-        <item row="6" column="0">
-         <widget class="QLabel" name="label_15">
-          <property name="text">
-           <string>Y</string>
-          </property>
-         </widget>
-        </item>
-        <item row="12" column="1">
+        <item row="14" column="2">
          <widget class="QSpinBox" name="spinBoxLightIntensityBlue">
           <property name="maximum">
            <number>255</number>
           </property>
          </widget>
         </item>
-        <item row="5" column="0">
-         <widget class="QLabel" name="label_14">
-          <property name="text">
-           <string>X </string>
+        <item row="17" column="2">
+         <widget class="QSpinBox" name="spinBoxLightIntensityAmbientGreen">
+          <property name="maximum">
+           <number>255</number>
           </property>
          </widget>
         </item>
-        <item row="11" column="0">
-         <widget class="QLabel" name="label_20">
+        <item row="17" column="1">
+         <widget class="QLabel" name="label_24">
           <property name="text">
-           <string>Green : </string>
+           <string>Green :</string>
           </property>
          </widget>
         </item>
-        <item row="8" column="0">
-         <widget class="QLabel" name="label_18">
+        <item row="4" column="1">
+         <widget class="QLabel" name="label_12">
           <property name="text">
-           <string>Light Intesity :</string>
+           <string>Ra :</string>
           </property>
          </widget>
         </item>
-        <item row="6" column="1">
+        <item row="3" column="1">
+         <widget class="QLabel" name="label_11">
+          <property name="text">
+           <string>Rs :</string>
+          </property>
+         </widget>
+        </item>
+        <item row="4" column="2">
+         <widget class="QSlider" name="horizontalSliderRaCoefficient">
+          <property name="maximum">
+           <number>100</number>
+          </property>
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+         </widget>
+        </item>
+        <item row="8" column="2">
          <widget class="QSpinBox" name="spinBoxLightPosY">
           <property name="minimum">
            <number>-1000</number>
@@ -692,76 +738,51 @@
           </property>
          </widget>
         </item>
-        <item row="7" column="0">
-         <widget class="QLabel" name="label_16">
+        <item row="10" column="1">
+         <widget class="QLabel" name="label_18">
           <property name="text">
-           <string>Z</string>
+           <string>Light Intesity :</string>
           </property>
          </widget>
         </item>
-        <item row="4" column="0">
-         <widget class="QLabel" name="label_13">
+        <item row="7" column="2">
+         <widget class="QSpinBox" name="spinBoxLightPosX">
+          <property name="minimum">
+           <number>-1000</number>
+          </property>
+          <property name="maximum">
+           <number>1000</number>
+          </property>
+          <property name="singleStep">
+           <number>10</number>
+          </property>
+         </widget>
+        </item>
+        <item row="13" column="1">
+         <widget class="QLabel" name="label_20">
           <property name="text">
-           <string>Light Position :</string>
+           <string>Green : </string>
           </property>
          </widget>
         </item>
-        <item row="2" column="0">
-         <widget class="QLabel" name="label_12">
+        <item row="1" column="2">
+         <widget class="QComboBox" name="comboBoxShadingAlg">
+          <item>
+           <property name="text">
+            <string>Flat shading</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Gouraund shading</string>
+           </property>
+          </item>
+         </widget>
+        </item>
+        <item row="1" column="1">
+         <widget class="QLabel" name="label_26">
           <property name="text">
-           <string>Ra :</string>
-          </property>
-         </widget>
-        </item>
-        <item row="12" column="0">
-         <widget class="QLabel" name="label_21">
-          <property name="text">
-           <string>Blue :</string>
-          </property>
-         </widget>
-        </item>
-        <item row="2" column="1">
-         <widget class="QSlider" name="horizontalSliderRaCoefficient">
-          <property name="maximum">
-           <number>100</number>
-          </property>
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-         </widget>
-        </item>
-        <item row="11" column="1">
-         <widget class="QSpinBox" name="spinBoxLightIntensityGreen">
-          <property name="maximum">
-           <number>255</number>
-          </property>
-         </widget>
-        </item>
-        <item row="16" column="0">
-         <widget class="QLabel" name="label_25">
-          <property name="text">
-           <string>Blue :</string>
-          </property>
-         </widget>
-        </item>
-        <item row="14" column="1">
-         <widget class="QSpinBox" name="spinBoxLightIntensityAmbientRed">
-          <property name="maximum">
-           <number>255</number>
-          </property>
-         </widget>
-        </item>
-        <item row="15" column="1">
-         <widget class="QSpinBox" name="spinBoxLightIntensityAmbientGreen">
-          <property name="maximum">
-           <number>255</number>
-          </property>
-         </widget>
-        </item>
-        <item row="16" column="1">
-         <widget class="QSpinBox" name="spinBoxLightIntensityAmbientBlue">
-          <property name="maximum">
-           <number>255</number>
+           <string>Shading :</string>
           </property>
          </widget>
         </item>

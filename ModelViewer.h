@@ -90,7 +90,7 @@ private slots:
 	void on_horizontalSliderCameraCoordZ_valueChanged(int value);
 	void on_comboBoxRepresentationType_currentIndexChanged(int index);
 	//Light settings
-	// 
+	void on_comboBoxShadingAlg_currentIndexChanged(int index);
 	//reflexion/difusion/ambient coefficients handlers
 	void on_horizontalSliderRdCoefficient_valueChanged(int value);
 	void on_horizontalSliderRsCoefficient_valueChanged(int value);

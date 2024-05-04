@@ -287,7 +287,7 @@ public:
 	void drawCurveCoons(QVector<QPoint> points, QColor color);
 
 	//3D draw functions
-	void drawObject(const Object_H_edge& object, Camera camera, ProjectionPlane projectionPlane, int projectionType, int representationType, const LightSettings* ls);
+	void drawObject(const Object_H_edge& object, Camera camera, ProjectionPlane projectionPlane, int projectionType, int representationType,int fillingAlgType, const LightSettings* ls);
 	QVector<Vertex> perspectiveCoordSystemTransformation(const Object_H_edge& object, int projectionType);
 	double baricentricInterpolation(const QVector<Vertex*> vertices, Vertex* currentVertex);
 	void fillObjectPolygonSetup(const QVector<Vertex*> vertices,QColor color, int fillingAlg, const LightSettings* ls);

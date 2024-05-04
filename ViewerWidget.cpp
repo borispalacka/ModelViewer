@@ -687,7 +687,7 @@ void ViewerWidget::drawCurveCoons(QVector<QPoint> points, QColor color) {
 	update();
 }
 //3D draw functions
-void ViewerWidget::drawObject(const Object_H_edge& object, Camera camera, ProjectionPlane projectionPlane, int projectionType, int representationType, const LightSettings* ls) {
+void ViewerWidget::drawObject(const Object_H_edge& object, Camera camera, ProjectionPlane projectionPlane, int projectionType, int representationType,int fillingAlgType, const LightSettings* ls) {
 	//Storing old Vertices in vector , transforming object to projection coordinates
 	QVector<Vertex> oldVertices = perspectiveCoordSystemTransformation(object,projectionType );
 	//Wireframe-Model
@@ -720,7 +720,7 @@ void ViewerWidget::drawObject(const Object_H_edge& object, Camera camera, Projec
 				edge = *edge.edge_next;
 				polygonVertices.append(edge.vert_origin);
 			}
-			fillObjectPolygonSetup(polygonVertices, object.colors.value(face), 1, ls );
+			fillObjectPolygonSetup(polygonVertices, object.colors.value(face), fillingAlgType, ls );
 		}
 	}
 
@@ -753,7 +753,6 @@ QVector<Vertex> ViewerWidget::perspectiveCoordSystemTransformation(const Object_
 	if (projectionType == 1) {
 		for (Vertex* vertex : object.vertices) {
 			Vertex newVertex(0, 0, 0);
-			oldVertices.append(*vertex);
 			//calculating new projection coordinates
 			newVertex.x = camera.position.z * vertex->x / (camera.position.z - vertex->z);
 			newVertex.y = camera.position.z * vertex->y / (camera.position.z - vertex->z);
@@ -855,6 +854,7 @@ void ViewerWidget::fillObjectPolygon(const QVector<Vertex*> vertices,const QVect
 		double m = 0;
 	};
 	//Interpolation that interpolates thru given Point and Vertices of triangle
+	//creating cosnt variables for better time complexitya
 	const double T0x = oldVertices[0]->x;
 	const double T0y = oldVertices[0]->y;
 	const double T0z = oldVertices[0]->z;
@@ -864,14 +864,43 @@ void ViewerWidget::fillObjectPolygon(const QVector<Vertex*> vertices,const QVect
 	const double T2x = oldVertices[2]->x;
 	const double T2y = oldVertices[2]->y;
 	const double T2z = oldVertices[2]->z;
+	//color values
+	const int C0R = colors.at(0).red();
+	const int C0G = colors.at(0).green();
+	const int C0B = colors.at(0).blue();
+	const int C1R = colors.at(1).red();
+	const int C1G = colors.at(1).green();
+	const int C1B = colors.at(1).blue();
+	const int C2R = colors.at(2).red();
+	const int C2G = colors.at(2).green();
+	const int C2B = colors.at(2).blue();
+
 	auto interpolation = [&](const Vertex& P, double& lambda1, double& lambda2, double& lambda3)->void  {
 		const double Px = P.x;
 		const double Py = P.y;
-		const double divider = (T1x - T0x) * (T2y - T0y) - (T1y - T0y) * (T2x - T0x);
-		lambda1 = abs((T1x - Px) * (T2y - Py) - (T1y - Py) * (T2x - Px) / divider);
-		lambda2 = abs((T0x - Px) * (T2y - Py) - (T0y - Py) * (T2x - Px) / divider);
+		const double divider = abs((T1x - T0x) * (T2y - T0y) - (T1y - T0y) * (T2x - T0x));
+		lambda1 = abs((T1x - Px) * (T2y - Py) - (T1y - Py) * (T2x - Px)) / divider;
+		lambda2 = abs((T0x - Px) * (T2y - Py) - (T0y - Py) * (T2x - Px)) / divider;
 		lambda3 = 1 - lambda1 - lambda2;
 	};
+
+	auto nearestNeighbour = [&](const Vertex& P) ->QColor {
+		double const distance0 = sqrt(pow(P.x - T0x, 2) + pow(P.y - T0y, 2));
+		double const distance1 = sqrt(pow(P.x - T1x, 2) + pow(P.y - T1y, 2));
+		double const distance2 = sqrt(pow(P.x - T2x, 2) + pow(P.y - T2y, 2));
+
+		if (distance0 <= distance1 && distance0 <= distance2) {
+			return colors.at(0);
+		}
+		else if (distance1 <= distance2 && distance1 <= distance0) {
+			return colors.at(1);
+		}
+		else if (distance2 <= distance1 && distance2 <= distance0) {
+			return colors.at(2);
+		}
+	};
+
+
 
 	QVector<Edge> edges;
 	QColor color = colors.first();
@@ -912,11 +941,16 @@ void ViewerWidget::fillObjectPolygon(const QVector<Vertex*> vertices,const QVect
 			z = lambda0 * T0z + lambda1 * T1z + lambda2 * T2z;
 			if (z > arrayOfZCoords.at(y).at(x)) {
 				if (usingLightSettings) {
-					red = lambda0 * colors.at(0).red() + lambda1 * colors.at(1).red() + lambda2 * colors.at(2).red();
-					green = lambda0 * colors.at(0).green() + lambda1 * colors.at(1).green() + lambda2 * colors.at(2).green();
-					blue = lambda0 * colors.at(0).blue() + lambda1 * colors.at(1).blue() + lambda2 * colors.at(2).blue();
-					color = QColor(static_cast<int>(red), static_cast<int> (green), static_cast<int> (blue), 255);
-					red = 0; green = 0; blue = 0;
+					if (fillAlgType == 1) {
+						red = lambda0 * C0R + lambda1 * C1R + lambda2 * C2R;
+						green = lambda0 * C0G + lambda1 * C1G + lambda2 * C2G;
+						blue = lambda0 * C0B + lambda1 * C1B + lambda2 * C2B;
+						color = QColor(static_cast<int>(red), static_cast<int> (green), static_cast<int> (blue), 255);
+						red = 0; green = 0; blue = 0;
+					}
+					else {
+						color = nearestNeighbour(currentVertex);
+					}
 				}
 				arrayOfZCoords[y][x] = z;
 				//arrayOfColors[y][x] = color;
