@@ -18,7 +18,7 @@ private:
 
 	QColor globalColor;
 	QSettings settings;
-	LightSettings *globalLightSettings;
+	LightSettings *globalLightSettings = nullptr;
 	QMessageBox msgBox;
 
 	bool isIn3dMode = false;
@@ -84,7 +84,6 @@ private slots:
 	void on_checkBoxVtkOutput_stateChanged(int state);
 
 	void on_comboBoxTypeCreateVTK_currentIndexChanged(int index);
-	void on_pushButtonCreateVTK_clicked();
 	void on_horizontalSliderZenit_valueChanged(int value);
 	void on_horizontalSliderAzimut_valueChanged(int value);
 	void on_comboBoxProjectionType_currentIndexChanged(int index);
@@ -117,4 +116,6 @@ private slots:
 
 	void on_action2D_triggered();
 	void on_action3D_triggered();
+	
+	void on_pushButtonCreateVTK_clicked();
 };

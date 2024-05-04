@@ -854,12 +854,22 @@ void ViewerWidget::fillObjectPolygon(const QVector<Vertex*> vertices,const QVect
 		Vertex end;
 		double m = 0;
 	};
-	const QVector<Vertex*>& T = oldVertices;
 	//Interpolation that interpolates thru given Point and Vertices of triangle
+	const double T0x = oldVertices[0]->x;
+	const double T0y = oldVertices[0]->y;
+	const double T0z = oldVertices[0]->z;
+	const double T1x = oldVertices[1]->x;
+	const double T1y = oldVertices[1]->y;
+	const double T1z = oldVertices[1]->z;
+	const double T2x = oldVertices[2]->x;
+	const double T2y = oldVertices[2]->y;
+	const double T2z = oldVertices[2]->z;
 	auto interpolation = [&](const Vertex& P, double& lambda1, double& lambda2, double& lambda3)->void  {
-		const double divider = abs(static_cast<double>(T[1]->x - T[0]->x) * (T[2]->y - T[0]->y) - (T[1]->y - T[0]->y) * (T[2]->x - T[0]->x));
-		lambda1 = abs((T[1]->x - P.x) * (T[2]->y - P.y) - (T[1]->y - P.y) * (T[2]->x - P.x)) / divider;
-		lambda2 = abs((T[0]->x - P.x) * (T[2]->y - P.y) - (T[0]->y - P.y) * (T[2]->x - P.x)) / divider;
+		const double Px = P.x;
+		const double Py = P.y;
+		const double divider = (T1x - T0x) * (T2y - T0y) - (T1y - T0y) * (T2x - T0x);
+		lambda1 = abs((T1x - Px) * (T2y - Py) - (T1y - Py) * (T2x - Px) / divider);
+		lambda2 = abs((T0x - Px) * (T2y - Py) - (T0y - Py) * (T2x - Px) / divider);
 		lambda3 = 1 - lambda1 - lambda2;
 	};
 
@@ -892,29 +902,25 @@ void ViewerWidget::fillObjectPolygon(const QVector<Vertex*> vertices,const QVect
 	double x1 = edges[0].start.x;
 	double x2 = edges[1].start.x;
 	double red = 0, green = 0, blue = 0;
-	QVector<double> lambda(3,0);
+	double lambda0, lambda1, lambda2;
+	double z;
 	//current Vertex  indicates itteration position in image
 	Vertex currentVertex = Vertex(static_cast<int>(x1), ymin,0);
 	for (int y = ymin ; y < ymax; y++) {
-
-		for (int x = static_cast<int>(x1); x <= static_cast<int>(x2 + 0.5); x++) {
-			if (isInside(x, y)) {
-				interpolation(currentVertex, lambda[0], lambda[1], lambda[2]);
-				double z = lambda[0] * T[0]->z + lambda[1] * T[1]->z + lambda[2] * T[2]->z;
-				if (static_cast<int>(z + 0.5) >= static_cast<int>(arrayOfZCoords.at(y).at(x))) {
-					if (usingLightSettings) {
-						for (int i = 0; i < 3; i++) {
-							red += lambda[i] * colors[i].red();
-							green += lambda[i] * colors[i].green();
-							blue += lambda[i] * colors[i].blue();
-						}
-						color = QColor(static_cast<int> (red), static_cast<int> (green), static_cast<int> (blue), 255);
-						red = 0; green = 0; blue = 0;
-					}
-					arrayOfZCoords[y][x] = z;
-					arrayOfColors[y][x] = color;
-					setPixel(x, y, color);
+		for (int x = x1; x <= static_cast<int>(x2); x++) {
+			interpolation(currentVertex, lambda0, lambda1, lambda2);
+			z = lambda0 * T0z + lambda1 * T1z + lambda2 * T2z;
+			if (z > arrayOfZCoords.at(y).at(x)) {
+				if (usingLightSettings) {
+					red = lambda0 * colors.at(0).red() + lambda1 * colors.at(1).red() + lambda2 * colors.at(2).red();
+					green = lambda0 * colors.at(0).green() + lambda1 * colors.at(1).green() + lambda2 * colors.at(2).green();
+					blue = lambda0 * colors.at(0).blue() + lambda1 * colors.at(1).blue() + lambda2 * colors.at(2).blue();
+					color = QColor(static_cast<int>(red), static_cast<int> (green), static_cast<int> (blue), 255);
+					red = 0; green = 0; blue = 0;
 				}
+				arrayOfZCoords[y][x] = z;
+				//arrayOfColors[y][x] = color;
+				setPixel(x, y, color);
 			}
 			currentVertex.x++;
 		}
@@ -923,7 +929,6 @@ void ViewerWidget::fillObjectPolygon(const QVector<Vertex*> vertices,const QVect
 		currentVertex.x = static_cast<int>(x1);
 		currentVertex.y++;
 	}
-	update();
 }
 
 //Crop functions
@@ -1320,7 +1325,6 @@ void createUvSphereVTK(double r, int longitude, int latitude, QString filename, 
 		for (int i = 0; i < vertices.length(); i++) {
 			for (const Vertex& vertex : vertices[i]) {
 				out << vertex.x << " " << vertex.y << " " << vertex.z << "\n";
-				std::cout << vertex.x << " " << vertex.y << " " << vertex.z << "\n";
 			}
 		}
 		out << "POLYGONS " << 2 * (longitude * latitude) - 2  << " " << 4 * (2 * (longitude * latitude) - 2) << "\n";

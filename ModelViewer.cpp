@@ -763,7 +763,17 @@ void ModelViewer::on_checkBoxVtkOutput_stateChanged(int state) {
 		ui->groupBoxVtkOutput->setHidden(true);
 	}
 }
-
+//Create VTK
+void ModelViewer::on_pushButtonCreateVTK_clicked() {
+	QString filename = QFileDialog::getSaveFileName(this, "Save VTK file", QDir::currentPath(), "VTK Files (*.vtk)");
+	// Create Cube VTK
+	if (ui->comboBoxTypeCreateVTK->currentIndex() == 0 && !filename.isEmpty()) {
+		createCubeVTK(ui->spinBoxEdgeLength->value(), filename);
+	}
+	else if (ui->comboBoxTypeCreateVTK->currentIndex() == 1 && !filename.isEmpty()) {
+		createUvSphereVTK(ui->doubleSpinBoxSphereRadius->value(), ui->spinBoxLongLatCount->value(), ui->spinBoxLongLatCount->value(), filename, 0);
+	}
+}
 void ModelViewer::on_comboBoxTypeCreateVTK_currentIndexChanged(int index) {
 	if (index == 0) {
 		ui->spinBoxLongLatCount->setEnabled(false);
@@ -775,9 +785,6 @@ void ModelViewer::on_comboBoxTypeCreateVTK_currentIndexChanged(int index) {
 		ui->doubleSpinBoxSphereRadius->setEnabled(true);
 		ui->spinBoxEdgeLength->setEnabled(false);
 	}
-}
-void ModelViewer::on_pushButtonCreateVTK_clicked() {
-
 }
 
 void ModelViewer::on_horizontalSliderZenit_valueChanged(int value) {
@@ -928,4 +935,6 @@ void ModelViewer::on_spinBoxLightIntensityAmbientBlue_valueChanged(int value) {
 		vW->drawObject(vW->getCurrentObject(), vW->getCamera(), vW->getProjectionPlane(), ui->comboBoxProjectionType->currentIndex(), ui->comboBoxRepresentationType->currentIndex(), globalLightSettings);
 	}
 }
+
+
 
