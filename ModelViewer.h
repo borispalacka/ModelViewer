@@ -3,7 +3,8 @@
 #include <QtWidgets/QMainWindow>
 #include <QtWidgets>
 #include "ui_ModelViewer.h"
-#include "ViewerWidget.h"
+#include "ViewerWidget.h" 
+#include <QTableWidget>
 
 class ModelViewer : public QMainWindow
 {
@@ -20,6 +21,13 @@ private:
 	QSettings settings;
 	LightSettings *globalLightSettings = nullptr;
 	QMessageBox msgBox;
+	
+	//2Dobjects
+	QMap <QString, Object2D> object_map; 
+	Object2D current_object;
+
+	//Table widget
+	QMenu* tableWidgetContextMenu;
 
 	bool isIn3dMode = false;
 
@@ -41,6 +49,8 @@ private:
 	//Image functions
 	bool openImage(QString filename);
 	bool saveImage(QString filename);
+	//Table Widget
+	void objectTableWidgetUpdate();
 
 private slots:
 	//actions
@@ -55,6 +65,7 @@ private slots:
 	void on_toolButtonDrawCircle_clicked();
 	void on_toolButtonDrawPolygon_clicked();
 	void on_toolButtonDrawCurve_clicked();
+	void on_tableWidgetObjectList_customContextMenuRequested(const QPoint &pos);
 
 	//Edit Tool slots
 	// 

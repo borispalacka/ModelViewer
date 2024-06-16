@@ -12,6 +12,7 @@ ModelViewer::ModelViewer(QWidget* parent)
 	ui->scrollArea->setWidgetResizable(true);
 	ui->scrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
 	ui->scrollArea->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+	ui->tableWidgetObjectList->setContextMenuPolicy(Qt::CustomContextMenu);
 
 	vW->setObjectName("ViewerWidget");
 	vW->installEventFilter(this);
@@ -66,16 +67,29 @@ void ModelViewer::ViewerWidgetMouseButtonPress(ViewerWidget* w, QEvent* event)
 {
 	QMouseEvent* e = static_cast<QMouseEvent*>(event);
 	qDebug() << e->pos().x() << e->pos().y();
+	//Draw Line
 	if (e->button() == Qt::LeftButton && ui->toolButtonDrawLine->isChecked() && ui->toolButtonDrawLine->isEnabled())
 	{
 		if (w->getDrawLineActivated()) {
 			w->setDrawLineEnd(e->pos());
-			w->drawLine(w->getDrawLineBegin(),w->getDrawLineEnd(), globalColor, ui->comboBoxLineAlg->currentIndex());
+			int line_index = 0;
+			QString object_name = "";
+			while (true) {
+				if (object_map.contains("line " + QString::number(line_index))) {
+					line_index++;
+				}
+				else {
+					object_name = "line " + QString::number(line_index);
+					break;
+				}
+			}
+			current_object = Object2D("line", object_name, {w->getDrawLineBegin(),w->getDrawLineEnd()}, globalColor, object_map.size());
+			object_map.insert(current_object.name, current_object);
+			//w->drawLine(w->getDrawLineBegin(),w->getDrawLineEnd(), globalColor, ui->comboBoxLineAlg->currentIndex());
+			w->drawObjects2D(object_map);
 			w->setDrawLineActivated(false);
-			ui->toolButtonDrawCircle->setEnabled(false);
-			ui->toolButtonDrawLine->setEnabled(false);
-			ui->toolButtonDrawPolygon->setEnabled(false);
-			ui->toolButtonDrawCurve->setEnabled(false);
+			ui->toolButtonDrawLine->setChecked(false);
+			objectTableWidgetUpdate();
 		}
 		else {
 			w->setDrawLineBegin(e->pos());
@@ -84,15 +98,27 @@ void ModelViewer::ViewerWidgetMouseButtonPress(ViewerWidget* w, QEvent* event)
 			w->update();
 		}
 	}
+	//Draw Circle
 	else if (e->button() == Qt::LeftButton && ui->toolButtonDrawCircle->isChecked() && ui->toolButtonDrawCircle->isEnabled()) {
 		if (w->getDrawLineActivated()) {
 			w->setDrawLineEnd(e->pos());
-			w->drawCircleBresenham(w->getDrawLineBegin(), w->getDrawLineEnd(), globalColor);
+			int circle_index = 0;
+			QString object_name = "";
+			while (true) {
+				if (object_map.contains("circle " + QString::number(circle_index))) {
+					circle_index++;
+				}
+				else {
+					object_name = "circle " + QString::number(circle_index);
+					break;
+				}
+			}
+			current_object = Object2D("circle", object_name, { w->getDrawLineBegin(),w->getDrawLineEnd() }, globalColor, object_map.size());
+			object_map.insert(current_object.name, current_object);
+			w->drawObjects2D(object_map);
 			w->setDrawLineActivated(false);
-			ui->toolButtonDrawCircle->setEnabled(false);
-			ui->toolButtonDrawLine->setEnabled(false);
-			ui->toolButtonDrawPolygon->setEnabled(false);
-			ui->toolButtonDrawCurve->setEnabled(false);
+			ui->toolButtonDrawCircle->setChecked(false);
+			objectTableWidgetUpdate();
 		}
 		else {
 			w->setDrawLineBegin(e->pos());
@@ -101,23 +127,47 @@ void ModelViewer::ViewerWidgetMouseButtonPress(ViewerWidget* w, QEvent* event)
 			w->update();
 		}
 	}
+	//Add Polygon Point
 	else if (e->button() == Qt::LeftButton && ui->toolButtonDrawPolygon->isChecked() && ui->toolButtonDrawPolygon->isEnabled()) {
 		w->getDrawPolygonPoints().append(e->pos());
 		w->drawCircleBresenham(e->pos(), e->pos() + QPoint(0, 2), Qt::black);
-		if (w->getDrawPolygonPoints().length() >= 3) {
+		if (w->getDrawPolygonPoints().length() >= 2) {
 			w->setDrawPolygonActivated(true);
 		}
 	}
+	//Draw Polygon
 	else if (e->button() == Qt::RightButton && ui->toolButtonDrawPolygon->isChecked() && ui->toolButtonDrawPolygon->isEnabled()) {
 		if (w->getDrawPolygonActivated()) {
-			w->drawPolygon(w->getDrawPolygonPoints(), globalColor, ui->comboBoxLineAlg->currentIndex(), ui->comboBoxFillingAlg->currentIndex());
+			if (w->getDrawPolygonPoints().length() == 2) {
+				QPoint point1 = w->getDrawPolygonPoints()[0];
+				QPoint point2 = w->getDrawPolygonPoints()[1];
+				int xmin = std::min({ point1.x(), point2.x() });
+				int xmax = std::max({ point1.x(), point2.x() });
+				int ymin = std::min({ point1.y(), point2.y() });
+				int ymax = std::max({ point1.y(), point2.y() });
+				w->getDrawPolygonPoints().clear();
+				w->getDrawPolygonPoints().append({ QPoint(xmin,ymin),QPoint(xmin,ymax), QPoint(xmax,ymax),QPoint(xmax,ymin) });
+			}
+			int polygon_index = 0;
+			QString object_name = "";
+			while (true) {
+				if (object_map.contains("polygon " + QString::number(polygon_index))) {
+					polygon_index++;
+				}
+				else {
+					object_name = "polygon " + QString::number(polygon_index);
+					break;
+				}
+			}
+			current_object = Object2D("polygon",object_name, w->getDrawPolygonPoints(), Qt::black, globalColor,ui->comboBoxFillingAlg->currentIndex(), object_map.size());
+			object_map.insert(current_object.name, current_object);
+			w->drawObjects2D(object_map);
 			w->setDrawPolygonActivated(false);
-			ui->toolButtonDrawCircle->setEnabled(false);
-			ui->toolButtonDrawLine->setEnabled(false);
-			ui->toolButtonDrawPolygon->setEnabled(false);
-			ui->toolButtonDrawCurve->setEnabled(false);
+			ui->toolButtonDrawPolygon->setChecked(false);
+			objectTableWidgetUpdate();
 		}
 	}
+	//Add Curve Point
 	else if (e->button() == Qt::LeftButton && ui->toolButtonDrawCurve->isChecked() && ui->toolButtonDrawCurve->isEnabled()){
 		QPair<QPoint, QPoint> vector = { e->pos(),e->pos() - QPoint(0, 100) };
 		w->getDrawCurveMasterPoints().append(vector);
@@ -129,14 +179,26 @@ void ModelViewer::ViewerWidgetMouseButtonPress(ViewerWidget* w, QEvent* event)
 			w->setDrawCurveActivated(true);
 		}
 	}
+	//Draw Curve
 	else if (e->button() == Qt::RightButton && ui->toolButtonDrawCurve->isChecked() && ui->toolButtonDrawCurve->isEnabled()) {
 		if (w->getDrawCurveActivated()) {
-			w->drawCurve(w->getDrawCurveMasterPoints(), globalColor, ui->comboBoxCurveAlg->currentIndex());
+			int curve_index = 0;
+			QString object_name = "";
+			while (true) {
+				if (object_map.contains("curve " + QString::number(curve_index))) {
+					curve_index++;
+				}
+				else {
+					object_name = "curve " + QString::number(curve_index);
+					break;
+				}
+			}
+			current_object = Object2D("curve", object_name, w->getDrawCurveMasterPoints(), globalColor, ui->comboBoxCurveAlg->currentIndex(), object_map.size());
+			object_map.insert(current_object.name, current_object);
+			w->drawObjects2D(object_map);
 			w->setDrawCurveActivated(false);
-			ui->toolButtonDrawCircle->setEnabled(false);
-			ui->toolButtonDrawLine->setEnabled(false);
-			ui->toolButtonDrawPolygon->setEnabled(false);
-			ui->toolButtonDrawCurve->setEnabled(false);
+			ui->toolButtonDrawCurve->setChecked(false);
+			objectTableWidgetUpdate();
 		}
 	}
 
@@ -165,16 +227,16 @@ void ModelViewer::ViewerWidgetMouseButtonRelease(ViewerWidget* w, QEvent* event)
 		qDebug() << "coords of the object changed";
 		w->setDragReady(false);
 		QPoint delta = w->getDragStartingPosition() - e->pos();
-		if (ui->toolButtonDrawCircle->isChecked() || ui->toolButtonDrawLine->isChecked()) {
-			w->setDrawLineBegin(w->getDrawLineBegin() - delta);
-			w->setDrawLineEnd(w->getDrawLineEnd() - delta);
+		if (current_object.type == "line" || current_object.type == "circle") {
+			current_object.points = { current_object.points[0] - delta, current_object.points[1] - delta };
+			object_map[current_object.name] = current_object;
 		}
 		else if (ui->toolButtonDrawPolygon->isChecked()) {
 			QVector<QPoint> resultPolygon;
-			for (const QPoint& point : w->getDrawPolygonPoints()) {
+			for (const QPoint& point : current_object.points) {
 				resultPolygon.append(point - delta);
 			}
-			w->getDrawPolygonPoints() = resultPolygon;
+			current_object.points = resultPolygon;
 		}
 		else if (ui->toolButtonDrawCurve->isChecked()) {
 			for (QPair<QPoint, QPoint>& pair : w->getDrawCurveMasterPoints()) {
@@ -197,18 +259,17 @@ void ModelViewer::ViewerWidgetMouseMove(ViewerWidget* w, QEvent* event)
 	if (ui->toolButtonEditPosition->isChecked() && w->getDragReady()) {
 		QPoint delta = w->getDragStartingPosition() - e->pos();
 		w->clear();
-		if (ui->toolButtonDrawLine->isChecked()) {
-			w->drawLine(w->getDrawLineBegin() - delta, w->getDrawLineEnd() - delta, globalColor, ui->comboBoxLineAlg->currentIndex());
+		if (current_object.type == "line" || current_object.type == "circle") {
+			current_object.points = { current_object.points[0] - delta, current_object.points[1] - delta };
+			object_map[current_object.name] = current_object;
 		}
-		else if (ui->toolButtonDrawCircle->isChecked()) {
-			w->drawCircleBresenham(w->getDrawLineBegin() - delta, w->getDrawLineEnd() - delta, globalColor);
-		}
-		else if (ui->toolButtonDrawPolygon->isChecked()) {
+		else if (current_object.type == "polygon") {
 			QVector<QPoint> resultPolygon;
-			for (const QPoint& point : w->getDrawPolygonPoints()) {
+			for (const QPoint& point : current_object.points) {
 				resultPolygon.append(point-delta);
 			}
-			w->drawPolygon(resultPolygon, globalColor, ui->comboBoxLineAlg->currentIndex(), ui->comboBoxFillingAlg->currentIndex());
+			current_object.points = resultPolygon;
+			object_map[current_object.name] = current_object;
 		}
 		else if (ui->toolButtonDrawCurve->isChecked()) {
 			QVector<QPair<QPoint, QPoint>> pointTmp = w->getDrawCurveMasterPoints();
@@ -225,6 +286,8 @@ void ModelViewer::ViewerWidgetMouseMove(ViewerWidget* w, QEvent* event)
 			w->drawCurve(pointTmp, globalColor, ui->comboBoxCurveAlg->currentIndex());
 		}
 	}
+	w->setDragStartingPosition(e->pos());
+	w->drawObjects2D(object_map);
 	w->update();
 }
 void ModelViewer::ViewerWidgetLeave(ViewerWidget* w, QEvent* event)
@@ -301,10 +364,89 @@ bool ModelViewer::saveImage(QString filename)
 	QImage* img = vW->getImage();
 	return img->save(filename, extension.toStdString().c_str());
 }
+//Table widget
+void ModelViewer::objectTableWidgetUpdate() {
+	ui->tableWidgetObjectList->clearContents();
+	ui->tableWidgetObjectList->setRowCount(0);
+	QList<Object2D> objects = object_map.values();
+	std::sort(objects.begin(), objects.end(), [](const Object2D& object1, const Object2D& object2) {
+		return object1.layer_height < object2.layer_height;
+		}); 
+	for (const Object2D& object : objects) {
+		int current_row = ui->tableWidgetObjectList->rowCount();
+		ui->tableWidgetObjectList->insertRow(current_row);
+		ui->tableWidgetObjectList->setItem(current_row, 0, new QTableWidgetItem(QString::number(object.layer_height)));
+		ui->tableWidgetObjectList->setItem(current_row, 1, new QTableWidgetItem(object.name));
+	}
+}
+void ModelViewer::on_tableWidgetObjectList_customContextMenuRequested(const QPoint& pos) {
+	QTableWidgetItem* rightClickedItem = ui->tableWidgetObjectList->itemAt(pos);
+	qDebug() << rightClickedItem->row() << rightClickedItem->column();
+	tableWidgetContextMenu = new QMenu(this);
+	QAction* select_action = new QAction("select");
+	QAction* delele_action = new QAction("delete");
+	QAction* move_up_action = new QAction("move up");
+	QAction* move_down_action = new QAction("move down");
+
+	tableWidgetContextMenu->addAction(select_action);
+	tableWidgetContextMenu->addAction(delele_action);
+	tableWidgetContextMenu->addAction(move_up_action);
+	tableWidgetContextMenu->addAction(move_down_action);
+	//Select item
+	connect(select_action, &QAction::triggered, this, [this, rightClickedItem]() {
+		current_object = object_map[rightClickedItem->text()];
+		});
+	//Delete item
+	connect(delele_action, &QAction::triggered, this, [this, rightClickedItem]() {
+		QString object_name = ui->tableWidgetObjectList->item(rightClickedItem->row(), 1)->text();
+		qDebug() << object_map.size();
+		object_map.remove(object_name);
+		qDebug() << object_map.size();
+		for (int i = rightClickedItem->row() + 1; i < ui->tableWidgetObjectList->rowCount(); i++) {
+			object_name = ui->tableWidgetObjectList->item(i, 1)->text();
+			object_map[object_name].layer_height--;
+		}
+		ui->tableWidgetObjectList->removeRow(rightClickedItem->row());
+		objectTableWidgetUpdate();
+		vW->clear();
+		vW->drawObjects2D(object_map);
+		});
+	//Move down
+	connect(move_up_action, &QAction::triggered, this, [this, rightClickedItem]() {
+		if (rightClickedItem->row() != 0) {
+			QString swapped_object_name = ui->tableWidgetObjectList->item(rightClickedItem->row() - 1, 1)->text();
+			QString object_name = ui->tableWidgetObjectList->item(rightClickedItem->row(), 1)->text();
+			object_map[object_name].layer_height--;
+			object_map[swapped_object_name].layer_height++;
+			objectTableWidgetUpdate();
+			vW->clear();
+			vW->drawObjects2D(object_map);
+		}
+		});
+	connect(move_down_action, &QAction::triggered, this, [this, rightClickedItem]() {
+		if (rightClickedItem->row() != ui->tableWidgetObjectList->rowCount() - 1) {
+			if (ui->tableWidgetObjectList->item(rightClickedItem->row() + 1, 1)) {
+				QString swapped_object_name = ui->tableWidgetObjectList->item(rightClickedItem->row() + 1, 1)->text();
+				object_map[swapped_object_name].layer_height--;
+				QString object_name = ui->tableWidgetObjectList->item(rightClickedItem->row(), 1)->text();
+				object_map[object_name].layer_height++;
+			}
+			objectTableWidgetUpdate();
+			vW->clear();
+			vW->drawObjects2D(object_map);
+		}
+		});
+	tableWidgetContextMenu->popup(ui->tableWidgetObjectList->viewport()->mapToGlobal(pos));
+
+
+}
 
 //Slots
 //2D Slots
 void ModelViewer::on_toolButtonDrawLine_clicked() {
+	vW->setDrawLineBegin(QPoint());
+	vW->setDrawLineEnd(QPoint());
+
 	ui->toolButtonDrawCircle->setChecked(false);
 	ui->toolButtonDrawPolygon->setChecked(false);
 	ui->toolButtonEditPosition->setChecked(false);
@@ -312,6 +454,9 @@ void ModelViewer::on_toolButtonDrawLine_clicked() {
 	ui->spinBoxRotation->setEnabled(false);
 }
 void ModelViewer::on_toolButtonDrawCircle_clicked() {
+	vW->setDrawLineBegin(QPoint());
+	vW->setDrawLineEnd(QPoint());
+
 	ui->toolButtonDrawLine->setChecked(false);
 	ui->toolButtonDrawPolygon->setChecked(false);
 	ui->toolButtonEditPosition->setChecked(false);
@@ -319,6 +464,8 @@ void ModelViewer::on_toolButtonDrawCircle_clicked() {
 	ui->spinBoxRotation->setEnabled(false);
 }
 void ModelViewer::on_toolButtonDrawPolygon_clicked() {
+	vW->getDrawPolygonPoints().clear();
+
 	ui->toolButtonDrawCircle->setChecked(false);
 	ui->toolButtonDrawLine->setChecked(false);
 	ui->spinBoxRotation->setEnabled(false);
@@ -665,6 +812,8 @@ void ModelViewer::on_actionClear_triggered()
 	vW->setDrawLineBegin(QPoint());
 	vW->setDrawLineEnd(QPoint());
 	vW->getDrawCurveMasterPoints().clear();
+	object_map.clear();
+	current_object = Object2D();
 }
 void ModelViewer::on_actionExit_triggered()
 {
@@ -763,6 +912,7 @@ void ModelViewer::on_checkBoxVtkOutput_stateChanged(int state) {
 		ui->groupBoxVtkOutput->setHidden(true);
 	}
 }
+
 //Create VTK
 void ModelViewer::on_pushButtonCreateVTK_clicked() {
 	QString filename = QFileDialog::getSaveFileName(this, "Save VTK file", QDir::currentPath(), "VTK Files (*.vtk)");

@@ -25,7 +25,7 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>754</width>
+         <width>689</width>
          <height>976</height>
         </rect>
        </property>
@@ -330,6 +330,29 @@
           <property name="text">
            <string>symmetry</string>
           </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </item>
+     <item>
+      <widget class="QGroupBox" name="groupBox_4">
+       <property name="title">
+        <string>Layers</string>
+       </property>
+       <layout class="QFormLayout" name="formLayout_4">
+        <item row="0" column="0">
+         <widget class="QTableWidget" name="tableWidgetObjectList">
+          <column>
+           <property name="text">
+            <string>Layer</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Name</string>
+           </property>
+          </column>
          </widget>
         </item>
        </layout>

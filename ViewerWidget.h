@@ -181,6 +181,28 @@ public:
 };
 //-------------------------------------------------------------
 
+class Object2D {
+public:
+	QString type = "";
+	QString name = "";
+	QVector<QPoint> points = QVector<QPoint>();
+	QVector<QPair<QPoint, QPoint>> curve_points = QVector<QPair<QPoint, QPoint>>();
+	int curve_type = 0;
+	QColor color_outline = Qt::white;
+	QColor color_filling = Qt::white;
+	int filling_alg = 0;
+	int layer_height = 0;
+	//Line / Circle
+	Object2D(QString type, QString name, QVector<QPoint> points, QColor color_outline,int layer_height) : type(type), name(name), points(points), color_outline(color_outline),layer_height(layer_height) {};
+	//Polygon
+	Object2D(QString type, QString name, QVector<QPoint> points, QColor color_outline, QColor color_filling, int filling_alg, int layer_height ):type(type), name(name), points(points), color_outline(color_outline), 
+		color_filling(color_filling),filling_alg(filling_alg), layer_height(layer_height) {};
+	//Curve
+	Object2D(QString type,QString name, QVector<QPair<QPoint, QPoint>> curve_points, QColor color_outline , int curve_type, int layer_height) : type(type), name(name), curve_points(curve_points),
+		color_outline(color_outline),curve_type(curve_type), layer_height(layer_height) {};
+	Object2D() {};
+};
+
 class ViewerWidget :public QWidget {
 	Q_OBJECT
 private:
@@ -251,6 +273,7 @@ public:
 	bool getDrawCurveActivated() { return drawCurveActivated; }
 	void setDrawCurveMasterPoints(QVector<QPair<QPoint, QPoint>> points) { drawCurveMasterPoints = points; }
 	QVector<QPair<QPoint, QPoint>>& getDrawCurveMasterPoints() { return drawCurveMasterPoints; }
+
 	//3D OBJECT DRAW
 	void setDrawObjectActivated(bool state) { drawObjectActivated = state; }
 	bool getDrawObjectActivated() { return drawObjectActivated; }
@@ -285,6 +308,8 @@ public:
 	void drawCurveHermint(QVector<QPair<QPoint, QPoint>> points, QColor color);
 	void drawCurveCasteljau(QVector<QPoint> points, QColor color);
 	void drawCurveCoons(QVector<QPoint> points, QColor color);
+
+	void drawObjects2D(QMap<QString,Object2D> objects);
 
 	//3D draw functions
 	void drawObject(const Object_H_edge& object, Camera camera, ProjectionPlane projectionPlane, int projectionType, int representationType,int fillingAlgType, const LightSettings* ls);

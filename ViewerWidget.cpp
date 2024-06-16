@@ -686,6 +686,24 @@ void ViewerWidget::drawCurveCoons(QVector<QPoint> points, QColor color) {
 	}
 	update();
 }
+
+void ViewerWidget::drawObjects2D(QMap<QString,Object2D> objects) {
+	for (Object2D object : objects.values()) {
+		if (object.type == "line") {
+			drawLine(object.points[0], object.points[1], object.color_outline, 1);
+		}
+		else if (object.type == "circle") {
+			drawCircleBresenham(object.points[0], object.points[1], object.color_outline);
+		}
+		else if (object.type == "polygon") {
+			drawPolygon(object.points, object.color_filling, 1, object.filling_alg);
+		}
+		else if (object.type == "curve") {
+			drawCurve(object.curve_points, object.color_outline, object.curve_type);
+		}
+	}
+	update();
+}
 //3D draw functions
 void ViewerWidget::drawObject(const Object_H_edge& object, Camera camera, ProjectionPlane projectionPlane, int projectionType, int representationType,int fillingAlgType, const LightSettings* ls) {
 	//Storing old Vertices in vector , transforming object to projection coordinates
