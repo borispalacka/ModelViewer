@@ -5,6 +5,7 @@
 #include "ui_ModelViewer.h"
 #include "ViewerWidget.h" 
 #include <QTableWidget>
+#include <QColorDialog>
 
 class ModelViewer : public QMainWindow
 {
@@ -27,7 +28,8 @@ private:
 	Object2D current_object;
 
 	//Table widget
-	QMenu* tableWidgetContextMenu;
+	QMenu* tableWidgetContextMenu = new QMenu();
+	int colored_row_index = 0;
 
 	bool isIn3dMode = false;
 
@@ -53,6 +55,10 @@ private:
 	void objectTableWidgetUpdate();
 
 private slots:
+	//table widget
+	void on_tableWidgetObjectList_customContextMenuRequested(const QPoint& pos);
+	void on_tableWidgetObjectList_cellDoubleClicked(int row, int column);
+
 	//actions
 	void on_actionOpen_triggered();
 	void on_actionSave_as_triggered();
@@ -65,7 +71,6 @@ private slots:
 	void on_toolButtonDrawCircle_clicked();
 	void on_toolButtonDrawPolygon_clicked();
 	void on_toolButtonDrawCurve_clicked();
-	void on_tableWidgetObjectList_customContextMenuRequested(const QPoint &pos);
 
 	//Edit Tool slots
 	// 

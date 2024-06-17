@@ -353,6 +353,16 @@
             <string>Name</string>
            </property>
           </column>
+          <column>
+           <property name="text">
+            <string>Type</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>color</string>
+           </property>
+          </column>
          </widget>
         </item>
        </layout>

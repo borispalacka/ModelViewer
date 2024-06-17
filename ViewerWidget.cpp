@@ -688,7 +688,11 @@ void ViewerWidget::drawCurveCoons(QVector<QPoint> points, QColor color) {
 }
 
 void ViewerWidget::drawObjects2D(QMap<QString,Object2D> objects) {
-	for (Object2D object : objects.values()) {
+	QVector<Object2D> sorted_objects = objects.values();
+	std::sort(sorted_objects.begin(), sorted_objects.end(), [](const Object2D& object1, const Object2D& object2) {
+		return object1.layer_height > object2.layer_height;
+		});
+	for (Object2D object : sorted_objects) {
 		if (object.type == "line") {
 			drawLine(object.points[0], object.points[1], object.color_outline, 1);
 		}
