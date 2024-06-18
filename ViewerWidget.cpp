@@ -19,6 +19,8 @@ ViewerWidget::ViewerWidget(QSize imgSize, QWidget* parent)
 		setPainter();
 		setDataPtr();
 	}
+	z_buffer_default_color_array = QVector<QVector<QColor>>(img->height(), QVector<QColor>(img->width(), Qt::white));
+	z_buffer_default_layer_array = QVector<QVector<double>>(img->height(), QVector<double>(img->width(), -DBL_MAX));
 }
 ViewerWidget::~ViewerWidget()
 {
@@ -848,10 +850,9 @@ void ViewerWidget::drawObjects2D(QMap<QString,Object2D> objects) {
 	QVector<Object2D> sorted_objects = objects.values();
 	/*std::sort(sorted_objects.begin(), sorted_objects.end(), [](const Object2D& object1, const Object2D& object2) {
 		return object1.layer_height > object2.layer_height;
-		});*/
-
-	z_buffer_layer_array = QVector<QVector<double>>(img->height(), QVector<double>(img->width(), -DBL_MAX));
-	z_buffer_color_array = QVector<QVector<QColor>>(img->height(), QVector<QColor>(img->width(), Qt::white));
+		});*/	
+	z_buffer_layer_array = z_buffer_default_layer_array;
+	z_buffer_color_array = z_buffer_default_color_array;
 	z_buffer_in_use = true;
 	for (Object2D object : sorted_objects) {
 		z_buffer_current_value = object.layer_height;
