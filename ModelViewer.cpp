@@ -231,39 +231,6 @@ void ModelViewer::ViewerWidgetMouseButtonPress(ViewerWidget* w, QEvent* event)
 }
 void ModelViewer::ViewerWidgetMouseButtonRelease(ViewerWidget* w, QEvent* event)
 {
-	//QMouseEvent* e = static_cast<QMouseEvent*>(event);
-	//if (ui->toolButtonEditPosition->isChecked() && e->button() == Qt::LeftButton) {
-	//	qDebug() << "coords of the object changed";
-	//	w->setDragReady(false);
-	//	QPoint delta = w->getDragStartingPosition() - e->pos();
-	//	if (current_object.type == "line" || current_object.type == "circle") {
-	//		current_object.points = { current_object.points[0] - delta, current_object.points[1] - delta };
-	//		object_map[current_object.name] = current_object;
-	//	}
-	//	else if (ui->toolButtonDrawPolygon->isChecked()) {
-	//		QVector<QPoint> resultPolygon;
-	//		for (const QPoint& point : current_object.points) {
-	//			resultPolygon.append(point - delta);
-	//		}
-	//		current_object.points = resultPolygon;
-	//	}
-	//	else if (current_object.type == "curve") {
-	//		QVector<QPair<QPoint, QPoint>> pointTmp = current_object.curve_points;
-	//		for (QPair<QPoint, QPoint>& pair : pointTmp) {
-	//			if (w->getDragedPoint() == pair.first) {
-	//				pair.first -= delta;
-	//				break;
-	//			}
-	//			else if (w->getDragedPoint() == pair.second) {
-	//				pair.second -= delta;
-	//				break;
-	//			}
-	//		}
-	//		w->setDragedPoint(QPoint());
-	//		current_object.curve_points = pointTmp;
-	//		object_map[current_object.name] = current_object;
-	//	}
-	//}
 	w->setDragReady(false);
 	w->setDragStartingPosition(QPoint());
 }
@@ -524,6 +491,171 @@ void ModelViewer::on_tableWidgetObjectList_cellDoubleClicked(int row, int column
 	objectTableWidgetUpdate();
 }
 
+//Save/Load 2d scene state
+void ModelViewer::saveSceneState(QString filename) {
+	QFile file(filename);
+
+	if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+		qDebug() << "Could not open file for writing:" << file.errorString();
+		return;
+	}
+	QTextStream out(&file);
+	out << "MODELVIEWER 2D SCENE FORMAT\n";
+	for (const Object2D& object : object_map.values()) {
+		out << "TYPE:" << object.type << "\n";
+		out << "NAME:" << object.name << "\n";
+		out << "OUTLINE_COLOR:" << object.color_outline.red() << ":" << object.color_outline.green() << ":" << object.color_outline.blue() << "\n";
+		out << "FILLING_COLOR:" << object.color_filling.red() << ":" << object.color_filling.green() << ":" << object.color_filling.blue() << "\n";
+		out << "FILLING_ALG:" << object.filling_alg << "\n";
+		out << "CURVE_TYPE:" << object.curve_type << "\n";
+		out << "LAYER:" << object.layer_height << "\n";
+		out << "POINTS:" << object.points.length() << "\n";
+		if (object.type == "curve") {
+			for (const QPair<QPoint, QPoint>& points : object.curve_points) {
+				out << points.first.x() << ":" << points.first.y() << ":" << points.second.x() << ":" << points.second.y() << "\n";
+			}
+		}
+		else {
+			for (int i = 0; i < object.points.length(); i++) {
+				out << object.points[i].x() << ":" << object.points[i].y() << "\n";
+			}
+		}
+		out << "\n";
+	}
+}
+void ModelViewer::loadSceneState(QString filename) {
+	QFile file(filename);
+
+	if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+		qDebug() << "Could not open file for writing:" << file.errorString();
+		return;
+	}
+	QMap<QString, Object2D> object_map_temporary = QMap<QString, Object2D>();
+	bool correct_format = true;
+	QTextStream in(&file);
+	if (in.readLine().trimmed() != "MODELVIEWER 2D SCENE FORMAT") {
+		correct_format = false;
+	}
+	while (!in.atEnd() && correct_format == true) {
+		//TYPE
+		QString file_line = in.readLine();
+		QList<QString> file_data = file_line.split(":");
+		if (file_data.length() != 2 || file_data[0] != "TYPE") {
+			correct_format = false;
+		}
+		QString object_type = file_data[1].trimmed().toLower();
+		//NAME
+		file_line = in.readLine();
+		file_data = file_line.split(":");
+		if (file_data.length() != 2 || file_data[0] != "NAME") {
+			correct_format = false;
+		}
+		QString object_name = file_data[1].trimmed();
+		//OUTLINE_COLOR
+		file_line = in.readLine();
+		file_data = file_line.split(":");
+		if (file_data.length() != 4 || file_data[0] != "OUTLINE_COLOR") {
+			correct_format = false;
+		}
+		correct_format = !std::all_of(file_data.begin() + 1, file_data.end(), [](QString string) {
+			bool ok;
+			string.toInt(&ok);
+			return ok;
+			});
+		QColor object_outline_color = QColor(file_data[1].toInt(), file_data[2].toInt(), file_data[3].toInt());
+		//FILLING_COLOR
+		file_line = in.readLine();
+		file_data = file_line.split(":");
+		if (file_data.length() != 4 || file_data[0] != "FILLING_COLOR") {
+			correct_format = false;
+		}
+		correct_format = !std::all_of(file_data.begin() + 1, file_data.end(), [](QString string) {
+			bool ok;
+			string.toInt(&ok);
+			return ok;
+			});
+		QColor object_filling_color = QColor(file_data[1].toInt(), file_data[2].toInt(), file_data[3].toInt());
+		//FILLING_ALG
+		file_line = in.readLine();
+		file_data = file_line.split(":");
+		if (file_data.length() != 2 || file_data[0] != "FILLING_ALG") {
+			correct_format = false;
+		}
+		int object_filling_alg = file_data[1].toInt(&correct_format);
+		//CURVE_TYPE
+		file_line = in.readLine();
+		file_data = file_line.split(":");
+		if (file_data.length() != 2 || file_data[0] != "CURVE_TYPE") {
+			correct_format = false;
+		}
+		int object_curve_type = file_data[1].toInt(&correct_format);
+		//LAYER
+		file_line = in.readLine();
+		file_data = file_line.split(":");
+		if (file_data.length() != 2 || file_data[0] != "LAYER") {
+			correct_format = false;
+		}
+		int object_layer = file_data[1].toInt(&correct_format);
+		//POINTS
+		file_line = in.readLine();
+		file_data = file_line.split(":");
+		if (file_data.length() != 2 || file_data[0] != "POINTS") {
+			correct_format = false;
+		}
+		int object_points_count = file_data[1].toInt(&correct_format);
+		if ((object_type == "line" || object_type == "circle") && object_points_count != 2) {
+			correct_format = false;
+		}
+		QVector<QPair<QPoint, QPoint>> object_curve_points = QVector<QPair<QPoint, QPoint>>();
+		QVector<QPoint> object_points = QVector<QPoint>();
+		for (int i = 0; i < object_points_count; i++) {
+			file_data = in.readLine().split(":");
+			if (object_type == "curve" && file_data.length() == 4) {
+				QPoint start(file_data[0].toInt(&correct_format), file_data[1].toInt(&correct_format));
+				if (!file_data[2].isEmpty() && !file_data[3].isEmpty()) {
+					QPoint end(file_data[2].toInt(&correct_format), file_data[3].toInt(&correct_format));
+					object_curve_points.append({ start,end });
+				}
+				else {
+					object_curve_points.append({ start,QPoint() });
+				}
+			}
+			else if (file_data.length() == 2) {
+				QPoint point(file_data[0].toInt(&correct_format), file_data[1].toInt(&correct_format));
+				object_points.append(point);
+			}
+		}
+		file_line = in.readLine();
+		if (!file_line.trimmed().isEmpty()) {
+			correct_format = false;
+			break;
+		}
+		Object2D object = Object2D();
+		object.type = object_type;
+		object.name = object_name;
+		object.color_outline = object_outline_color;
+		object.color_filling = object_filling_color;
+		object.filling_alg = object_filling_alg;
+		object.curve_type = object_curve_type;
+		object.layer_height = object_layer;
+		object.curve_points = object_curve_points;
+		object.points = object_points;
+
+		object_map_temporary.insert(object.name, object);
+
+	}
+	if (!correct_format) {
+		QMessageBox::warning(nullptr, "Warning", "Wrong format file!", QMessageBox::Ok);
+	}
+	else {
+		object_map = object_map_temporary;
+		vW->drawObjects2D(object_map);
+		current_object = object_map.values().first();
+		objectTableWidgetUpdate();
+	}
+	qDebug() << "file loaded";
+}
+
 //Slots
 //2D Slots
 //Draw
@@ -753,7 +885,7 @@ void ModelViewer::on_spinBoxScaleY_editingFinished() {
 	}
 	ui->spinBoxScaleY->setValue(1);
 }
-
+//Shear
 void ModelViewer::on_toolButtonEditShear_clicked() {
 	if (ui->toolButtonEditShear->isChecked()) {
 		ui->spinBoxShearFactor->setEnabled(true);
@@ -808,7 +940,7 @@ void ModelViewer::on_spinBoxShearFactor_editingFinished() {
 	}
 	ui->spinBoxShearFactor->setValue(0);
 }
-
+//Symmetry
 void ModelViewer::on_toolButtonSymmetry_clicked() {
 	if (ui->toolButtonDrawLine->isChecked()) {
 		QPoint A = QPoint(vW->getDrawLineBegin().x(), 0);
@@ -847,7 +979,7 @@ void ModelViewer::on_toolButtonSymmetry_clicked() {
 		vW->update();
 	}
 }
-
+//Actions
 void ModelViewer::on_actionOpen_triggered()
 {	
 	QString folder = settings.value("folder_img_load_path", "").toString();
@@ -934,6 +1066,18 @@ void ModelViewer::on_actionClear_triggered()
 void ModelViewer::on_actionExit_triggered()
 {
 	this->close();
+}
+void ModelViewer::on_actionSave_state_triggered() {
+	QString filename = QFileDialog::getSaveFileName(this, "save state", "/save/modelviewer_project", "Text files(*.txt)");
+	if (!filename.isEmpty()) {
+		saveSceneState(filename);
+	}
+}
+void ModelViewer::on_actionLoad_state_triggered(){
+	QString filename = QFileDialog::getOpenFileName(this, "laod state",QDir::currentPath() + "/save/", "Text files(*.txt)");
+	if (!filename.isEmpty()) {
+		loadSceneState(filename);
+	}
 }
 
 void ModelViewer::on_pushButtonSetColor_clicked()

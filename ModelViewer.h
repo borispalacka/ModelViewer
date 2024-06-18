@@ -6,6 +6,7 @@
 #include "ViewerWidget.h" 
 #include <QTableWidget>
 #include <QColorDialog>
+#include <QMessageBox>
 
 class ModelViewer : public QMainWindow
 {
@@ -54,6 +55,10 @@ private:
 	//Table Widget
 	void objectTableWidgetUpdate();
 
+	//save/load state 2D Scene
+	void saveSceneState(QString filename);
+	void loadSceneState(QString filename);
+
 private slots:
 	//table widget
 	void on_tableWidgetObjectList_customContextMenuRequested(const QPoint& pos);
@@ -64,6 +69,8 @@ private slots:
 	void on_actionSave_as_triggered();
 	void on_actionClear_triggered();
 	void on_actionExit_triggered();
+	void on_actionSave_state_triggered();
+	void on_actionLoad_state_triggered();
 
 	//Tools slots
 	void on_pushButtonSetColor_clicked();
