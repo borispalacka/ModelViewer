@@ -156,27 +156,100 @@ void ViewerWidget::drawCircleBresenham(QPoint start, QPoint end, QColor color) {
 	for (x = 0; x <= y; x++) {
 		if (isInside(y + start.x(), x + start.y())) {
 			setPixel(y + start.x(), x + start.y(), color);
+			if (z_buffer_in_use) {
+				if (z_buffer_current_value > z_buffer_layer_array[x + start.y()][y + start.x()]) {
+					z_buffer_color_array[x + start.y()][y + start.x()] = color;
+					z_buffer_layer_array[x + start.y()][y + start.x()] = z_buffer_current_value;
+				}
+				else {
+					setPixel(y + start.x(), x + start.y(), z_buffer_color_array[x + start.y()][y + start.x()]);
+				}
+			}
 		}
 		if (isInside(x + start.x(), y + start.y())) {
 			setPixel(x + start.x(), y + start.y(), color);
+			if (z_buffer_in_use) {
+				if (z_buffer_current_value > z_buffer_layer_array[y + start.y()][x + start.x()]) {
+					z_buffer_color_array[y + start.y()][x + start.x()] = color;
+					z_buffer_layer_array[y + start.y()][x + start.x()] = z_buffer_current_value;
+				}
+				else {
+					setPixel(x + start.x(), y + start.y(), z_buffer_color_array[y + start.y()][x + start.x()]);
+				}
+			}
 		}
 		if (isInside(x + start.x(), -y + start.y())) {
 			setPixel(x + start.x(), -y + start.y(), color);
+			if (z_buffer_in_use) {
+				if (z_buffer_current_value > z_buffer_layer_array[-y + start.y()][x + start.x()]) {
+					z_buffer_color_array[-y + start.y()][x + start.x()] = color;
+					z_buffer_layer_array[-y + start.y()][x + start.x()] = z_buffer_current_value;
+				}
+				else {
+					setPixel(x + start.x(), -y + start.y(), z_buffer_color_array[-y + start.y()][x + start.x()]);
+				}
+			}
 		}
 		if (isInside(-y + start.x(), x + start.y())) {
 			setPixel(-y + start.x(), x + start.y(), color);
+			if (z_buffer_in_use) {
+				if (z_buffer_current_value > z_buffer_layer_array[x + start.y()][-y + start.x()]) {
+					z_buffer_color_array[x + start.y()][-y + start.x()] = color;
+					z_buffer_layer_array[x + start.y()][-y + start.x()] = z_buffer_current_value;
+				}
+				else {
+					setPixel(-y + start.x(), x + start.y(), z_buffer_color_array[x + start.y()][-y + start.x()]);
+				}
+			}
+
 		}
 		if (isInside(-y + start.x(), -x + start.y())) {
 			setPixel(-y + start.x(), -x + start.y(), color);
+			if (z_buffer_in_use) {
+				if (z_buffer_current_value > z_buffer_layer_array[-x + start.y()][-y + start.x()]) {
+					z_buffer_color_array[-x + start.y()][-y + start.x()] = color;
+					z_buffer_layer_array[-x + start.y()][-y + start.x()] = z_buffer_current_value;
+				}
+				else {
+					setPixel(-y + start.x(), -x + start.y(), z_buffer_color_array[-x + start.y()][-y + start.x()]);
+				}
+			}
 		}
 		if (isInside(-x + start.x(), -y + start.y())) {
 			setPixel(-x + start.x(), -y + start.y(), color);
+			if (z_buffer_in_use) {
+				if (z_buffer_current_value > z_buffer_layer_array[-y + start.y()][-x + start.x()]) {
+					z_buffer_color_array[-y + start.y()][-x + start.x()] = color;
+					z_buffer_layer_array[-y + start.y()][-x + start.x()] = z_buffer_current_value;
+				}
+				else {
+					setPixel(-x + start.x(), -y + start.y(), z_buffer_color_array[-y + start.y()][-x + start.x()]);
+				}
+			}
 		}
 		if (isInside(-x + start.x(), y + start.y())) {
 			setPixel(-x + start.x(), y + start.y(), color);
+			if (z_buffer_in_use) {
+				if (z_buffer_current_value > z_buffer_layer_array[y + start.y()][-x + start.x()]) {
+					z_buffer_color_array[y + start.y()][-x + start.x()] = color;
+					z_buffer_layer_array[y + start.y()][-x + start.x()] = z_buffer_current_value;
+				}
+				else {
+					setPixel(-x + start.x(), y + start.y(), z_buffer_color_array[y + start.y()][-x + start.x()]);
+				}
+			}
 		}
 		if (isInside(y + start.x(), -x + start.y())) {
 			setPixel(y + start.x(), -x + start.y(), color);
+			if (z_buffer_in_use) {
+				if (z_buffer_current_value > z_buffer_layer_array[-x + start.y()][y + start.x()]) {
+					z_buffer_color_array[-x + start.y()][y + start.x()] = color;
+					z_buffer_layer_array[-x + start.y()][y + start.x()] = z_buffer_current_value;
+				}
+				else {
+					setPixel(y + start.x(), -x + start.y(), z_buffer_color_array[-x + start.y()][y + start.x()]);
+				}
+			}
 		}
 		if (pCurrent > 0) {
 			pCurrent = pCurrent - twoY;
@@ -198,7 +271,19 @@ void ViewerWidget::drawLineDDA(QPoint start, QPoint end, QColor color) {
 			double y = start.y();
 			for (int x = start.x(); x < end.x(); x++) {
 				if (isInside(x, static_cast<int>(y + 0.5))) {
-					setPixel(x, static_cast<int>(y + 0.5), color);
+					if (z_buffer_in_use) {
+						if (z_buffer_current_value > z_buffer_layer_array[static_cast<int>(y + 0.5)][x]) {
+							z_buffer_layer_array[static_cast<int>(y + 0.5)][x] = z_buffer_current_value;
+							z_buffer_color_array[static_cast<int>(y + 0.5)][x] = color;
+							setPixel(x, static_cast<int>(y + 0.5), color);
+						}
+						else {
+							setPixel(x, static_cast<int>(y + 0.5), z_buffer_color_array[static_cast<int>(y + 0.5)][x]);
+						}
+					}
+					else {
+						setPixel(x, static_cast<int>(y + 0.5), color);
+					}
 				}
 				y += m;
 			}
@@ -211,6 +296,15 @@ void ViewerWidget::drawLineDDA(QPoint start, QPoint end, QColor color) {
 			for (int y = start.y(); y < end.y(); y++) {
 				if (isInside(static_cast<int>(x + 0.5), y)) {
 					setPixel(static_cast<int>(x + 0.5), y, color);
+					if (z_buffer_in_use) {
+						if (z_buffer_current_value > z_buffer_layer_array[y][static_cast<int>(x + 0.5)]) {
+							z_buffer_layer_array[y][static_cast<int>(x + 0.5)] = z_buffer_current_value;
+							z_buffer_color_array[y][static_cast<int>(x + 0.5)] = color;
+						}
+						else {
+							setPixel(static_cast<int>(x + 0.5), y, z_buffer_color_array[y][static_cast<int>(x + 0.5)]);
+						}
+					}
 				}
 				x += 1 / m;
 			}
@@ -223,6 +317,15 @@ void ViewerWidget::drawLineDDA(QPoint start, QPoint end, QColor color) {
 		for (int y = start.y(); y < end.y(); y++) {
 			if (isInside(start.x(), y)) {
 				setPixel(start.x(), y, color);
+				if (z_buffer_in_use) {
+					if (z_buffer_current_value > z_buffer_layer_array[y][start.x()]) {
+						z_buffer_layer_array[y][start.x()] = z_buffer_current_value;
+						z_buffer_color_array[y][start.x()] = color;
+					}
+					else {
+						setPixel(start.x(), y, z_buffer_color_array[y][start.x()]);
+					}
+				}
 			}
 		}
 	}
@@ -235,6 +338,15 @@ void ViewerWidget::drawLineBresenham(QPoint start, QPoint end, QColor color) {
 		for (int y = start.y(); y <= end.y(); y++) {
 			if (isInside(start.x(), y)) {
 				setPixel(start.x(), y, color);
+				if (z_buffer_in_use) {
+					if (z_buffer_current_value > z_buffer_layer_array[y][start.x()]) {
+						z_buffer_layer_array[y][start.x()] = z_buffer_current_value;
+						z_buffer_color_array[y][start.x()] = color;
+					}
+					else {
+						setPixel(start.x(), y, z_buffer_color_array[y][start.x()]);
+					}
+				}
 			}
 		}
 		return;
@@ -282,6 +394,15 @@ void ViewerWidget::drawLineBresenham(QPoint start, QPoint end, QColor color) {
 			}
 			if (isInside(x, y)) {
 				setPixel(x, y, color);
+				if (z_buffer_in_use) {
+					if (z_buffer_current_value > z_buffer_layer_array[y][x]) {
+						z_buffer_layer_array[y][x] = z_buffer_current_value;
+						z_buffer_color_array[y][x] = color;
+					}
+					else {
+						setPixel(x, y, z_buffer_color_array[y][x]);
+					}
+				}
 			}
 		}
 
@@ -326,6 +447,18 @@ void ViewerWidget::drawLineBresenham(QPoint start, QPoint end, QColor color) {
 			}
 			if (isInside(x, y)) {
 				setPixel(x, y, color);
+				if (isInside(x, y)) {
+					setPixel(x, y, color);
+					if (z_buffer_in_use) {
+						if (z_buffer_current_value > z_buffer_layer_array[y][x]) {
+							z_buffer_layer_array[y][x] = z_buffer_current_value;
+							z_buffer_color_array[y][x] = color;
+						}
+						else {
+							setPixel(x, y, z_buffer_color_array[y][x]);
+						}
+					}
+				}
 			}
 		}
 	}
@@ -449,6 +582,18 @@ void ViewerWidget::scanLinePolygon(QVector<QPoint> points, QColor color) {
 					for (int x = xIntercept1; x <= xIntercept2; x++) {
 						if (isInside(x, y)) {
 							setPixel(x, y, color);
+							if (isInside(x, y)) {
+								setPixel(x, y, color);
+								if (z_buffer_in_use) {
+									if (z_buffer_current_value > z_buffer_layer_array[y][x]) {
+										z_buffer_layer_array[y][x] = z_buffer_current_value;
+										z_buffer_color_array[y][x] = color;
+									}
+									else {
+										setPixel(x, y, z_buffer_color_array[y][x]);
+									}
+								}
+							}
 						}
 					}
 				}
@@ -536,6 +681,18 @@ void ViewerWidget::fillTriangle(QVector<QPoint> currentPoints, QVector<QPoint> o
 				}
 				if (isInside(x, y)) {
 					setPixel(x, y, color);
+					if (isInside(x, y)) {
+						setPixel(x, y, color);
+						if (z_buffer_in_use) {
+							if (z_buffer_current_value > z_buffer_layer_array[y][x]) {
+								z_buffer_layer_array[y][x] = z_buffer_current_value;
+								z_buffer_color_array[y][x] = color;
+							}
+							else {
+								setPixel(x, y, z_buffer_color_array[y][x]);
+							}
+						}
+					}
 				}
 			}
 		}
@@ -615,7 +772,7 @@ void ViewerWidget::drawCurveHermint(QVector<QPair<QPoint, QPoint>> points, QColo
 		Q0 = P[i - 1].first;
 		for (double t = deltaT; t < 1; t += deltaT) {
 			F = cubicPolynoms(t);
-			Q1 = P[i - 1].first * F[0] + P[i].first * F[1] + P[i - 1].second * F[2] + P[i].second * F[3];
+			Q1 = P[i - 1].first * F[0] + P[i].first * F[1] + (P[i - 1].second - P[i - 1].first) * F[2] + (P[i].second - P[i].first) * F[3];
 			drawLine(Q0.toPoint(), Q1.toPoint(), color, 1);
 			Q0 = Q1;
 			k++;
@@ -689,10 +846,15 @@ void ViewerWidget::drawCurveCoons(QVector<QPoint> points, QColor color) {
 
 void ViewerWidget::drawObjects2D(QMap<QString,Object2D> objects) {
 	QVector<Object2D> sorted_objects = objects.values();
-	std::sort(sorted_objects.begin(), sorted_objects.end(), [](const Object2D& object1, const Object2D& object2) {
+	/*std::sort(sorted_objects.begin(), sorted_objects.end(), [](const Object2D& object1, const Object2D& object2) {
 		return object1.layer_height > object2.layer_height;
-		});
+		});*/
+
+	z_buffer_layer_array = QVector<QVector<double>>(img->height(), QVector<double>(img->width(), -DBL_MAX));
+	z_buffer_color_array = QVector<QVector<QColor>>(img->height(), QVector<QColor>(img->width(), Qt::white));
+	z_buffer_in_use = true;
 	for (Object2D object : sorted_objects) {
+		z_buffer_current_value = object.layer_height;
 		if (object.type == "line") {
 			drawLine(object.points[0], object.points[1], object.color_outline, 1);
 		}
@@ -731,8 +893,8 @@ void ViewerWidget::drawObject(const Object_H_edge& object, Camera camera, Projec
 	//Surface-Representation
 	else if (representationType == 1) {
 		// filling arrays of depth of image and color for Z-buffer algorithm
-		arrayOfZCoords = QVector<QVector<double>>(img->height(), QVector<double>(img->width(), -DBL_MAX));
-		arrayOfColors = QVector<QVector<QColor>>(img->height(), QVector<QColor>(img->width(),Qt::white));
+		z_buffer_layer_array = QVector<QVector<double>>(img->height(), QVector<double>(img->width(), -DBL_MAX));
+		z_buffer_color_array = QVector<QVector<QColor>>(img->height(), QVector<QColor>(img->width(),Qt::white));
 		//iterating thru faces of polygon
 		for (Face* face : object.faces) {
 			QVector<Vertex*> polygonVertices;
@@ -961,7 +1123,7 @@ void ViewerWidget::fillObjectPolygon(const QVector<Vertex*> vertices,const QVect
 		for (int x = x1; x <= static_cast<int>(x2); x++) {
 			interpolation(currentVertex, lambda0, lambda1, lambda2);
 			z = lambda0 * T0z + lambda1 * T1z + lambda2 * T2z;
-			if (z > arrayOfZCoords.at(y).at(x)) {
+			if (z > z_buffer_layer_array.at(y).at(x)) {
 				if (usingLightSettings) {
 					if (fillAlgType == 1) {
 						red = lambda0 * C0R + lambda1 * C1R + lambda2 * C2R;
@@ -974,8 +1136,8 @@ void ViewerWidget::fillObjectPolygon(const QVector<Vertex*> vertices,const QVect
 						color = nearestNeighbour(currentVertex);
 					}
 				}
-				arrayOfZCoords[y][x] = z;
-				//arrayOfColors[y][x] = color;
+				z_buffer_layer_array[y][x] = z;
+				//z_buffer_color_array[y][x] = color;
 				setPixel(x, y, color);
 			}
 			currentVertex.x++;

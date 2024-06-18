@@ -6,7 +6,7 @@ ModelViewer::ModelViewer(QWidget* parent)
 	: QMainWindow(parent), ui(new Ui::ModelViewerClass)
 {
 	ui->setupUi(this);
-	vW = new ViewerWidget(QSize(700, 700));
+	vW = new ViewerWidget(QSize(sizex, sizey));
 	ui->scrollArea->setWidget(vW);
 	ui->scrollArea->setBackgroundRole(QPalette::Dark);
 	ui->scrollArea->setWidgetResizable(true);
@@ -208,6 +208,7 @@ void ModelViewer::ViewerWidgetMouseButtonPress(ViewerWidget* w, QEvent* event)
 			w->setDrawCurveActivated(false);
 			w->getDrawCurveMasterPoints().clear();
 			ui->toolButtonDrawCurve->setChecked(false);
+			ui->comboBoxCurveAlg->setEnabled(true);
 			objectTableWidgetUpdate();
 		}
 	}
@@ -397,6 +398,9 @@ void ModelViewer::objectTableWidgetUpdate() {
 }
 void ModelViewer::on_tableWidgetObjectList_customContextMenuRequested(const QPoint& pos) {
 	QTableWidgetItem* rightClickedItem = ui->tableWidgetObjectList->itemAt(pos);
+	if (!rightClickedItem) {
+		return;
+	}
 	tableWidgetContextMenu = new QMenu(this);
 	QAction* select_action = new QAction("select");
 	QAction* delele_action = new QAction("delete");
@@ -414,6 +418,8 @@ void ModelViewer::on_tableWidgetObjectList_customContextMenuRequested(const QPoi
 		QString object_name = ui->tableWidgetObjectList->item(rightClickedItem->row(), 1)->text();
 		current_object = object_map[object_name];
 		objectTableWidgetUpdate();
+		delete tableWidgetContextMenu;
+		tableWidgetContextMenu = nullptr;
 		});
 	//Delete item
 	connect(delele_action, &QAction::triggered, this, [this, rightClickedItem]() {
@@ -435,6 +441,8 @@ void ModelViewer::on_tableWidgetObjectList_customContextMenuRequested(const QPoi
 			else{
 				current_object = object_map[ui->tableWidgetObjectList->item(rightClickedItem->row() - 1, 1)->text()];
 			}
+			delete tableWidgetContextMenu;
+			tableWidgetContextMenu = nullptr;
 		}
 		ui->tableWidgetObjectList->removeRow(rightClickedItem->row());
 		objectTableWidgetUpdate();
@@ -451,6 +459,8 @@ void ModelViewer::on_tableWidgetObjectList_customContextMenuRequested(const QPoi
 			objectTableWidgetUpdate();
 			vW->clear();
 			vW->drawObjects2D(object_map);
+			delete tableWidgetContextMenu;
+			tableWidgetContextMenu = nullptr;
 		}
 		});
 	//Move down
@@ -465,6 +475,8 @@ void ModelViewer::on_tableWidgetObjectList_customContextMenuRequested(const QPoi
 			objectTableWidgetUpdate();
 			vW->clear();
 			vW->drawObjects2D(object_map);
+			delete tableWidgetContextMenu;
+			tableWidgetContextMenu = nullptr;
 		}
 		});
 	//Change color
@@ -478,12 +490,15 @@ void ModelViewer::on_tableWidgetObjectList_customContextMenuRequested(const QPoi
 				current_object.color_filling = color;
 				current_object.color_outline = color;
 			}
-			vW->drawObjects2D(object_map);
 			vW->clear();
+			vW->drawObjects2D(object_map);
 			objectTableWidgetUpdate();
+			delete tableWidgetContextMenu;
+			tableWidgetContextMenu = nullptr;
 		}
 		});
 	tableWidgetContextMenu->popup(ui->tableWidgetObjectList->viewport()->mapToGlobal(pos));
+
 }
 void ModelViewer::on_tableWidgetObjectList_cellDoubleClicked(int row, int column) {
 	QString object_name = ui->tableWidgetObjectList->item(row, 1)->text();
@@ -501,6 +516,7 @@ void ModelViewer::saveSceneState(QString filename) {
 	}
 	QTextStream out(&file);
 	out << "MODELVIEWER 2D SCENE FORMAT\n";
+	out << "SIZE:" << vW->getImage()->width() << ":" << vW->getImage()->height() << "\n";
 	for (const Object2D& object : object_map.values()) {
 		out << "TYPE:" << object.type << "\n";
 		out << "NAME:" << object.name << "\n";
@@ -509,13 +525,14 @@ void ModelViewer::saveSceneState(QString filename) {
 		out << "FILLING_ALG:" << object.filling_alg << "\n";
 		out << "CURVE_TYPE:" << object.curve_type << "\n";
 		out << "LAYER:" << object.layer_height << "\n";
-		out << "POINTS:" << object.points.length() << "\n";
 		if (object.type == "curve") {
+			out << "POINTS:" << object.curve_points.length() << "\n";
 			for (const QPair<QPoint, QPoint>& points : object.curve_points) {
 				out << points.first.x() << ":" << points.first.y() << ":" << points.second.x() << ":" << points.second.y() << "\n";
 			}
 		}
 		else {
+			out << "POINTS:" << object.points.length() << "\n";
 			for (int i = 0; i < object.points.length(); i++) {
 				out << object.points[i].x() << ":" << object.points[i].y() << "\n";
 			}
@@ -536,10 +553,19 @@ void ModelViewer::loadSceneState(QString filename) {
 	if (in.readLine().trimmed() != "MODELVIEWER 2D SCENE FORMAT") {
 		correct_format = false;
 	}
+	QString file_line = in.readLine();
+	QList<QString> file_data = file_line.split(":");
+	if (file_data.length() != 3 || file_data[0] != "SIZE") {
+		correct_format = false;
+	}
+	else {
+		sizex = file_data[1].toInt(&correct_format);
+		sizey = file_data[2].toInt(&correct_format);
+	}
 	while (!in.atEnd() && correct_format == true) {
 		//TYPE
-		QString file_line = in.readLine();
-		QList<QString> file_data = file_line.split(":");
+		file_line = in.readLine();
+		file_data = file_line.split(":");
 		if (file_data.length() != 2 || file_data[0] != "TYPE") {
 			correct_format = false;
 		}
@@ -648,12 +674,27 @@ void ModelViewer::loadSceneState(QString filename) {
 		QMessageBox::warning(nullptr, "Warning", "Wrong format file!", QMessageBox::Ok);
 	}
 	else {
+		createViewerWidget(sizex, sizey);
+
+		vW->setObjectName("ViewerWidget");
+		vW->installEventFilter(this);
+
 		object_map = object_map_temporary;
 		vW->drawObjects2D(object_map);
 		current_object = object_map.values().first();
 		objectTableWidgetUpdate();
 	}
 	qDebug() << "file loaded";
+}
+
+void ModelViewer::createViewerWidget(int width, int height) {
+	delete vW;
+	vW = new ViewerWidget(QSize(width, height));
+	ui->scrollArea->setWidget(vW);
+	ui->scrollArea->setBackgroundRole(QPalette::Dark);
+	ui->scrollArea->setWidgetResizable(true);
+	ui->scrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+	ui->scrollArea->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
 }
 
 //Slots
@@ -1062,6 +1103,7 @@ void ModelViewer::on_actionClear_triggered()
 	vW->getDrawCurveMasterPoints().clear();
 	object_map.clear();
 	current_object = Object2D();
+	objectTableWidgetUpdate();
 }
 void ModelViewer::on_actionExit_triggered()
 {

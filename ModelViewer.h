@@ -23,7 +23,8 @@ private:
 	QSettings settings;
 	LightSettings *globalLightSettings = nullptr;
 	QMessageBox msgBox;
-	
+	int sizex = 700, sizey = 700;
+
 	//2Dobjects
 	QMap <QString, Object2D> object_map; 
 	Object2D current_object;
@@ -58,6 +59,9 @@ private:
 	//save/load state 2D Scene
 	void saveSceneState(QString filename);
 	void loadSceneState(QString filename);
+
+	//Viewer widget setup
+	void createViewerWidget(int width, int height);
 
 private slots:
 	//table widget

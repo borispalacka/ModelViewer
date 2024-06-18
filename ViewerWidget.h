@@ -216,8 +216,10 @@ private:
 
 	//Hash tables for Z-buffer algorithm
 
-	QVector<QVector<QColor>> arrayOfColors;
-	QVector<QVector<double>> arrayOfZCoords;
+	QVector<QVector<QColor>> z_buffer_color_array;
+	QVector<QVector<double>> z_buffer_layer_array;
+	bool z_buffer_in_use = false;
+	int z_buffer_current_value = 0;
 
 	bool drawLineActivated = false;
 	QPoint drawLineBegin = QPoint(0, 0);
